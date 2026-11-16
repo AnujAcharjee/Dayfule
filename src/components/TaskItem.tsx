@@ -164,12 +164,12 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    borderRadius: 14,
+    paddingHorizontal: 13,
+    paddingVertical: 10,
+    borderRadius: 12,
     borderWidth: 1,
-    marginBottom: 10,
-    gap: 12,
+    marginBottom: 8,
+    gap: 10,
   },
   checkbox: {
     width: 24,

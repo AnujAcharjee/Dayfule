@@ -134,9 +134,9 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
     }
   };
 
-  // Big Loader Ring metrics
-  const loaderSize = 64;
-  const strokeWidth = 6;
+  // Compact Header Loader Ring metrics
+  const loaderSize = 42;
+  const strokeWidth = 4;
   const radius = (loaderSize - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - progressRatio * circumference;
@@ -157,14 +157,14 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
               <View style={[styles.handle, { backgroundColor: colors.surfaceBorder }]} />
             </View>
 
-            {/* Header with full date & close button */}
+            {/* Header: Date & Close Button */}
             <View style={styles.headerRow}>
               <View style={styles.dateInfo}>
                 <Text style={[styles.fullDate, { color: colors.text }]}>
                   {formatFullDate(day.date_str)}
                 </Text>
 
-                {/* Day status tag */}
+                {/* Status tag */}
                 <View style={styles.tagRow}>
                   {day.isToday && (
                     <View style={[styles.statusTag, { backgroundColor: '#FF2D55' }]}>
@@ -179,11 +179,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                         { backgroundColor: mode === 'dark' ? '#202026' : '#E2E8F0' },
                       ]}
                     >
-                      <MaterialCommunityIcons
-                        name="lock"
-                        size={12}
-                        color={colors.textMuted}
-                      />
+                      <MaterialCommunityIcons name="lock" size={11} color={colors.textMuted} />
                       <Text style={[styles.frozenTagText, { color: colors.textMuted }]}>
                         FROZEN
                       </Text>
@@ -197,11 +193,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                         { backgroundColor: mode === 'dark' ? '#181E29' : '#EEF2FF' },
                       ]}
                     >
-                      <MaterialCommunityIcons
-                        name="calendar-clock"
-                        size={12}
-                        color="#38BDF8"
-                      />
+                      <MaterialCommunityIcons name="calendar-clock" size={11} color="#38BDF8" />
                       <Text style={styles.futureTagText}>UPCOMING</Text>
                     </View>
                   )}
@@ -213,46 +205,26 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
               </TouchableOpacity>
             </View>
 
-            {/* Frozen Notice Banner if day is frozen */}
-            {day.isFrozen && (
-              <View
-                style={[
-                  styles.frozenBanner,
-                  {
-                    backgroundColor: colors.frozenBg,
-                    borderColor: colors.frozenBorder,
-                  },
-                ]}
-              >
-                <MaterialCommunityIcons
-                  name="shield-lock-outline"
-                  size={20}
-                  color={colors.textMuted}
-                />
-                <Text style={[styles.frozenBannerText, { color: colors.textSecondary }]}>
-                  This day has ended and is frozen. Completed and uncompleted tasks can no longer be updated.
-                </Text>
-              </View>
-            )}
-
-            {/* Day Progress Ring Card */}
+            {/* Compact Progress & Action Bar */}
             <View
               style={[
-                styles.progressCard,
+                styles.compactActionBar,
                 {
                   backgroundColor: colors.card,
                   borderColor: isPerfect ? '#2ECC71' : colors.cardBorder,
                 },
               ]}
             >
+              {/* Day Loader Ring (Rainbow Progress Arc) */}
               <View style={styles.loaderWrapper}>
                 <Svg width={loaderSize} height={loaderSize}>
                   <Defs>
                     <SvgLinearGradient id="modalDayGrad" x1="0%" y1="0%" x2="100%" y2="100%">
                       <Stop offset="0%" stopColor="#FF2D55" />
-                      <Stop offset="30%" stopColor="#FF9500" />
-                      <Stop offset="60%" stopColor="#2ECC71" />
-                      <Stop offset="100%" stopColor="#00C9FF" />
+                      <Stop offset="25%" stopColor="#FFA500" />
+                      <Stop offset="50%" stopColor="#2ECC71" />
+                      <Stop offset="75%" stopColor="#00C9FF" />
+                      <Stop offset="100%" stopColor="#AF52DE" />
                     </SvgLinearGradient>
                   </Defs>
                   <Circle
@@ -281,7 +253,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                 <View style={StyleSheet.absoluteFill} pointerEvents="none">
                   <View style={styles.loaderCenter}>
                     {isPerfect ? (
-                      <MaterialCommunityIcons name="trophy" size={20} color="#FFD700" />
+                      <MaterialCommunityIcons name="check-bold" size={15} color="#2ECC71" />
                     ) : (
                       <Text style={[styles.loaderPctText, { color: colors.text }]}>
                         {totalCount > 0 ? `${progressPct}%` : '0%'}
@@ -291,52 +263,73 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                 </View>
               </View>
 
-              <View style={styles.progressDetails}>
+              {/* Progress Summary Text */}
+              <View style={styles.progressSummary}>
                 <Text style={[styles.progressTitle, { color: colors.text }]}>
                   {totalCount === 0
-                    ? 'No Tasks Planned'
+                    ? 'No tasks yet'
                     : isPerfect
-                    ? 'All Tasks Finished!'
-                    : `${completedCount} of ${totalCount} Tasks Done`}
+                    ? 'All completed!'
+                    : `${completedCount} of ${totalCount} done`}
                 </Text>
                 <Text style={[styles.progressSubtitle, { color: colors.textSecondary }]}>
                   {totalCount === 0
-                    ? 'Plan your day to build your productivity ring.'
-                    : `${progressPct}% daily completion`}
+                    ? 'Plan your day below'
+                    : `${progressPct}% daily progress`}
                 </Text>
               </View>
-            </View>
 
-            {/* Tasks section header & Add button */}
-            <View style={styles.sectionHeaderRow}>
-              <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
-                TASKS ({completedCount}/{totalCount})
-              </Text>
+              {/* Solid Blue Add Task Button */}
               {!day.isFrozen && (
                 <TouchableOpacity
                   activeOpacity={0.8}
-                  style={[styles.addButton, { backgroundColor: '#0A84FF' }]}
+                  style={styles.blueAddButton}
                   onPress={() => {
                     setEditingTask(null);
                     setShowEditor(true);
                   }}
                 >
-                  <MaterialCommunityIcons name="plus" size={16} color="#FFFFFF" />
-                  <Text style={styles.addBtnText}>Add Task</Text>
+                  <MaterialCommunityIcons name="plus" size={17} color="#FFFFFF" />
+                  <Text style={styles.blueAddButtonText}>Add Task</Text>
                 </TouchableOpacity>
               )}
             </View>
 
-            {/* Tasks list */}
+            {/* Frozen Notice Banner if day is frozen */}
+            {day.isFrozen && (
+              <View
+                style={[
+                  styles.frozenBanner,
+                  {
+                    backgroundColor: colors.frozenBg,
+                    borderColor: colors.frozenBorder,
+                  },
+                ]}
+              >
+                <MaterialCommunityIcons name="lock" size={15} color={colors.textMuted} />
+                <Text style={[styles.frozenBannerText, { color: colors.textSecondary }]}>
+                  Day ended and frozen. Historical tasks cannot be modified.
+                </Text>
+              </View>
+            )}
+
+            {/* Tasks section title */}
+            <View style={styles.tasksHeaderRow}>
+              <Text style={[styles.sectionTitle, { color: colors.textSecondary }]}>
+                TASKS ({completedCount}/{totalCount})
+              </Text>
+            </View>
+
+            {/* Tasks list - maximized height to fit 5+ tasks easily */}
             {loading ? (
               <View style={styles.loadingContainer}>
-                <ActivityIndicator size="small" color={colors.accent} />
+                <ActivityIndicator size="small" color="#0A84FF" />
               </View>
             ) : tasks.length === 0 ? (
               <View style={styles.emptyContainer}>
                 <MaterialCommunityIcons
                   name="calendar-check-outline"
-                  size={42}
+                  size={46}
                   color={colors.textMuted}
                 />
                 <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
@@ -344,16 +337,15 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                 </Text>
                 {!day.isFrozen && (
                   <TouchableOpacity
-                    style={[styles.emptyAddBtn, { backgroundColor: '#0A84FF' }]}
+                    style={styles.emptyBlueAddBtn}
+                    activeOpacity={0.8}
                     onPress={() => {
                       setEditingTask(null);
                       setShowEditor(true);
                     }}
                   >
-                    <MaterialCommunityIcons name="plus" size={16} color="#FFFFFF" />
-                    <Text style={styles.emptyAddBtnText}>
-                      Add Task
-                    </Text>
+                    <MaterialCommunityIcons name="plus" size={18} color="#FFFFFF" />
+                    <Text style={styles.emptyBlueAddBtnText}>Add Task</Text>
                   </TouchableOpacity>
                 )}
               </View>
@@ -361,7 +353,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
               <ScrollView
                 style={styles.tasksList}
                 showsVerticalScrollIndicator={false}
-                contentContainerStyle={{ paddingBottom: 24 }}
+                contentContainerStyle={styles.tasksScrollContent}
               >
                 {tasks.map((task) => (
                   <TaskItem
@@ -415,16 +407,16 @@ const styles = StyleSheet.create({
   sheet: {
     borderTopLeftRadius: 26,
     borderTopRightRadius: 26,
-    paddingTop: 12,
-    paddingHorizontal: 20,
-    paddingBottom: Platform.OS === 'ios' ? 36 : 24,
-    maxHeight: '90%',
-    minHeight: 460,
+    paddingTop: 10,
+    paddingHorizontal: 18,
+    paddingBottom: Platform.OS === 'ios' ? 36 : 18,
+    height: '88%',
+    maxHeight: '92%',
   },
   handleContainer: {
     alignItems: 'center',
     paddingVertical: 4,
-    marginBottom: 8,
+    marginBottom: 6,
   },
   handle: {
     width: 38,
@@ -435,26 +427,26 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-start',
-    marginBottom: 12,
+    marginBottom: 10,
   },
   dateInfo: {
     flex: 1,
   },
   fullDate: {
-    fontSize: 20,
+    fontSize: 18,
     fontWeight: '800',
-    letterSpacing: -0.4,
+    letterSpacing: -0.3,
   },
   tagRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    marginTop: 6,
+    gap: 6,
+    marginTop: 4,
   },
   statusTag: {
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 5,
   },
   todayTagText: {
     color: '#FFFFFF',
@@ -465,10 +457,10 @@ const styles = StyleSheet.create({
   frozenTag: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
+    gap: 3,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 5,
   },
   frozenTagText: {
     fontWeight: '700',
@@ -478,10 +470,10 @@ const styles = StyleSheet.create({
   futureTag: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 6,
+    gap: 3,
+    paddingHorizontal: 7,
+    paddingVertical: 2,
+    borderRadius: 5,
   },
   futureTagText: {
     color: '#38BDF8',
@@ -493,33 +485,20 @@ const styles = StyleSheet.create({
     padding: 6,
     borderRadius: 20,
   },
-  frozenBanner: {
+  compactActionBar: {
     flexDirection: 'row',
     alignItems: 'center',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 14,
+    borderWidth: 1,
+    marginBottom: 10,
     gap: 10,
-    padding: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    marginBottom: 14,
-  },
-  frozenBannerText: {
-    flex: 1,
-    fontSize: 12,
-    lineHeight: 16,
-  },
-  progressCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 14,
-    borderRadius: 16,
-    borderWidth: 1,
-    marginBottom: 16,
-    gap: 14,
   },
   loaderWrapper: {
     position: 'relative',
-    width: 64,
-    height: 64,
+    width: 42,
+    height: 42,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -529,60 +508,74 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   loaderPctText: {
-    fontSize: 14,
+    fontSize: 11,
     fontWeight: '800',
+    letterSpacing: -0.5,
   },
-  progressDetails: {
+  progressSummary: {
     flex: 1,
   },
   progressTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '700',
   },
   progressSubtitle: {
-    fontSize: 13,
-    marginTop: 2,
+    fontSize: 11,
+    marginTop: 1,
   },
-  sectionHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
-  },
-  sectionTitle: {
-    fontSize: 12,
-    fontWeight: '800',
-    letterSpacing: 0.8,
-  },
-  addButton: {
+  blueAddButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     backgroundColor: '#0A84FF',
-    paddingHorizontal: 12,
-    paddingVertical: 7,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
     borderRadius: 10,
   },
-  addBtnText: {
+  blueAddButtonText: {
     color: '#FFFFFF',
     fontSize: 13,
     fontWeight: '700',
   },
-  loadingContainer: {
-    paddingVertical: 40,
+  frozenBanner: {
+    flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 10,
+    borderWidth: 1,
+    marginBottom: 8,
   },
-  emptyContainer: {
-    paddingVertical: 36,
+  frozenBannerText: {
+    flex: 1,
+    fontSize: 11,
+  },
+  tasksHeaderRow: {
+    marginBottom: 8,
+  },
+  sectionTitle: {
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.8,
+  },
+  loadingContainer: {
+    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  emptyContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 40,
     gap: 8,
   },
   emptyText: {
     fontSize: 14,
-    marginTop: 4,
+    marginTop: 2,
   },
-  emptyAddBtn: {
+  emptyBlueAddBtn: {
     marginTop: 10,
     flexDirection: 'row',
     alignItems: 'center',
@@ -592,12 +585,15 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: '#0A84FF',
   },
-  emptyAddBtnText: {
+  emptyBlueAddBtnText: {
     fontSize: 14,
     fontWeight: '700',
     color: '#FFFFFF',
   },
   tasksList: {
     flex: 1,
+  },
+  tasksScrollContent: {
+    paddingBottom: 28,
   },
 });
