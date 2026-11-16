@@ -6,6 +6,10 @@ import { SQLiteProvider } from 'expo-sqlite';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ThemeProvider, useTheme } from '@/context/ThemeContext';
 import { initializeDatabase } from '@/database/schema';
+import { registerWidgets } from '@/widgets/widgetManager';
+
+// Register Android home screen widget task handler (safely handled across build environments)
+registerWidgets();
 
 function RootLayoutContent() {
   const { mode, colors } = useTheme();

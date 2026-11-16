@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform, Alert } from 'react-native';
 import Svg, { Defs, LinearGradient as SvgLinearGradient, Stop, Text as SvgText } from 'react-native-svg';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { YearStats } from '@/types';
 import { useTheme } from '@/context/ThemeContext';
 import { isLeapYear } from '@/utils/dateUtils';
+import { isWidgetSupported, pinTodayWidget } from '@/widgets/widgetManager';
 
 interface YearHeaderProps {
   year: number;
@@ -44,6 +45,23 @@ export const YearHeader: React.FC<YearHeaderProps> = ({
     daysElapsed = Math.min(stats.daysPassed, totalDaysInYear);
     yearProgressPct = Math.round((daysElapsed / totalDaysInYear) * 100);
   }
+
+  const handleWidgetPress = async () => {
+    if (isWidgetSupported) {
+      const pinned = await pinTodayWidget();
+      if (!pinned) {
+        Alert.alert(
+          'Home Screen Widget',
+          'Touch and hold an empty space on your phone home screen, select "Widgets", and choose "Dayfule Today" to place it!'
+        );
+      }
+    } else {
+      Alert.alert(
+        'Home Screen Widget 📱',
+        'Android home screen widgets are configured for Dayfule!\n\nWhen installed on your device via APK or EAS Build, touch and hold your phone home screen to place the "Dayfule Today" widget.'
+      );
+    }
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -99,6 +117,20 @@ export const YearHeader: React.FC<YearHeaderProps> = ({
             <Text style={[styles.pillText, { color: colors.text }]}>
               {viewMode === 'months' ? 'Compact' : 'Months'}
             </Text>
+          </TouchableOpacity>
+
+          {/* Add Home Screen Widget Button */}
+          <TouchableOpacity
+            style={[styles.iconCircle, { backgroundColor: colors.surface, borderColor: colors.surfaceBorder }]}
+            onPress={handleWidgetPress}
+            activeOpacity={0.8}
+            accessibilityLabel="Add Widget"
+          >
+            <MaterialCommunityIcons
+              name="widgets-outline"
+              size={18}
+              color="#0A84FF"
+            />
           </TouchableOpacity>
 
           {/* Theme toggle */}

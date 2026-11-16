@@ -32,6 +32,12 @@ A minimalist, high-productivity mobile application built with **React Native (Ex
 - **Local-Only SQLite Storage**:
   - Powered by `expo-sqlite` (WAL journal mode).
   - Fast, privacy-first, on-device storage with zero external cloud dependencies.
+- **Android Home Screen Widget**:
+  - Keep today's planned todo list and daily completion percentage directly on your phone's home screen.
+  - Automatically updates when you add, edit, check off, or delete tasks in the app.
+  - Displays Break Day (pink `#FF8DA1`) and Exam Day (yellow `#FFD600`) status tags.
+  - Tap on the widget anytime to instantly open Dayfule.
+  - In-app 1-tap Pin button in the top header.
 - **Built for Android & iOS with EAS & Expo Go**:
   - Configured with `eas.json` for APK preview builds and Google Play App Bundles.
 

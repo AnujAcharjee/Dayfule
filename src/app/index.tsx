@@ -20,6 +20,7 @@ import {
 import { YearHeader } from '@/components/YearHeader';
 import { YearGrid } from '@/components/YearGrid';
 import { DayDetailModal } from '@/components/DayDetailModal';
+import { syncTodayWidget } from '@/widgets/widgetManager';
 
 export default function IndexScreen() {
   const insets = useSafeAreaInsets();
@@ -41,6 +42,21 @@ export default function IndexScreen() {
   const [selectedDay, setSelectedDay] = useState<DayProgress | null>(null);
   const [isDayModalVisible, setIsDayModalVisible] = useState<boolean>(false);
 
+  // Sync Today's tasks to the home screen widget
+  const refreshTodayWidget = useCallback(async () => {
+    try {
+      const todayKey = getTodayKey();
+      const [todayTasks, isBreak, isExam] = await Promise.all([
+        repo.getTasksByDate(todayKey),
+        repo.isBreakDay(todayKey),
+        repo.isExamDay(todayKey),
+      ]);
+      await syncTodayWidget(todayTasks, isBreak, isExam);
+    } catch (err) {
+      console.warn('Widget update error', err);
+    }
+  }, [repo]);
+
   // Load data for the selected year
   const loadYearData = useCallback(async () => {
     setLoading(true);
@@ -53,12 +69,14 @@ export default function IndexScreen() {
       setAggregations(aggs);
       setBreakDays(breaks);
       setExamDays(exams);
+      await refreshTodayWidget();
+      await refreshTodayWidget();
     } catch (err) {
       console.error('Failed to load year data', err);
     } finally {
       setLoading(false);
     }
-  }, [repo, selectedYear]);
+  }, [repo, selectedYear, refreshTodayWidget]);
 
   useEffect(() => {
     loadYearData();
@@ -91,6 +109,7 @@ export default function IndexScreen() {
       setAggregations(aggs);
       setBreakDays(breaks);
       setExamDays(exams);
+      await refreshTodayWidget();
 
       // Also update selectedDay reference
       if (selectedDay) {

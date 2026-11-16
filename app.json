@@ -25,7 +25,24 @@
     },
     "plugins": [
       "expo-router",
-      "expo-sqlite"
+      "expo-sqlite",
+      [
+        "react-native-android-widget",
+        {
+          "widgets": [
+            {
+              "name": "TodayWidget",
+              "label": "Dayfule Today",
+              "minWidth": "240dp",
+              "minHeight": "110dp",
+              "targetCellWidth": 4,
+              "targetCellHeight": 2,
+              "updatePeriodMillis": 1800000,
+              "description": "View today's todos and track daily progress on your home screen"
+            }
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
