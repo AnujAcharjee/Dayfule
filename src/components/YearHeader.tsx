@@ -49,8 +49,8 @@ export const YearHeader: React.FC<YearHeaderProps> = ({
       {/* Top brand & controls row */}
       <View style={styles.topRow}>
         <View style={styles.brandContainer}>
-          <Text style={[styles.brandTitle, { color: colors.text }]}>TASKFULE</Text>
-          <View style={styles.brandDot} />
+          <Text style={[styles.brandTitle, { color: '#FF5E3A' }]}>TASKFULE</Text>
+          <View style={[styles.brandDot, { backgroundColor: '#FF5E3A' }]} />
         </View>
 
         <View style={styles.topActions}>
@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#0A84FF',
+    backgroundColor: '#FF5E3A',
   },
   topActions: {
     flexDirection: 'row',
