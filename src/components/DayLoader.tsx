@@ -65,37 +65,72 @@ export const DayLoader: React.FC<DayLoaderProps> = React.memo(({
             </LinearGradient>
           </Defs>
 
-          {/* Background track circle */}
-          <Circle
-            cx={size / 2}
-            cy={size / 2}
-            r={radius}
-            stroke={trackColor}
-            strokeWidth={strokeWidth}
-            fill="transparent"
-          />
-
-          {/* Progress arc */}
-          {hasTasks && day.progress > 0 && (
+          {/* If Break Day: full round dark pink */}
+          {day.isBreakDay ? (
             <Circle
               cx={size / 2}
               cy={size / 2}
               r={radius}
-              stroke={`url(#${gradId})`}
+              stroke="#880E4F"
               strokeWidth={strokeWidth}
-              strokeDasharray={circumference}
-              strokeDashoffset={strokeDashoffset}
-              strokeLinecap="round"
-              fill="transparent"
-              transform={`rotate(-90 ${size / 2} ${size / 2})`}
+              fill="#C2185B"
             />
+          ) : (
+            <>
+              {/* Background track circle */}
+              <Circle
+                cx={size / 2}
+                cy={size / 2}
+                r={radius}
+                stroke={trackColor}
+                strokeWidth={strokeWidth}
+                fill="transparent"
+              />
+
+              {/* Progress arc */}
+              {hasTasks && day.progress > 0 && (
+                <Circle
+                  cx={size / 2}
+                  cy={size / 2}
+                  r={radius}
+                  stroke={`url(#${gradId})`}
+                  strokeWidth={strokeWidth}
+                  strokeDasharray={circumference}
+                  strokeDashoffset={strokeDashoffset}
+                  strokeLinecap="round"
+                  fill="transparent"
+                  transform={`rotate(-90 ${size / 2} ${size / 2})`}
+                />
+              )}
+            </>
           )}
         </Svg>
 
         {/* Center content */}
         <View style={StyleSheet.absoluteFill} pointerEvents="none">
           <View style={styles.centerContainer}>
-            {isPerfect ? (
+            {day.isBreakDay ? (
+              showDayNumber ? (
+                <Text
+                  style={[
+                    styles.dayText,
+                    {
+                      fontSize: Math.max(8, size * 0.36),
+                      color: '#FFFFFF',
+                      fontWeight: '800',
+                    },
+                  ]}
+                >
+                  {day.dayOfMonth}
+                </Text>
+              ) : (
+                <MaterialCommunityIcons
+                  name="coffee"
+                  size={Math.max(9, size * 0.44)}
+                  color="#FFFFFF"
+                />
+              )
+            ) : isPerfect ? (
               <MaterialCommunityIcons
                 name="check"
                 size={Math.max(10, size * 0.44)}

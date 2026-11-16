@@ -32,5 +32,10 @@ export async function initializeDatabase(db: SQLiteDatabase): Promise<void> {
       key TEXT PRIMARY KEY NOT NULL,
       value TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS break_days (
+      date_str TEXT PRIMARY KEY NOT NULL,
+      created_at TEXT NOT NULL
+    );
   `);
 }

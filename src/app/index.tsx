@@ -33,6 +33,7 @@ export default function IndexScreen() {
   const [aggregations, setAggregations] = useState<
     Record<string, { total: number; completed: number }>
   >({});
+  const [breakDays, setBreakDays] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState<boolean>(true);
 
   // Selected day for modal
@@ -43,8 +44,12 @@ export default function IndexScreen() {
   const loadYearData = useCallback(async () => {
     setLoading(true);
     try {
-      const aggs = await repo.getYearAggregations(selectedYear);
+      const [aggs, breaks] = await Promise.all([
+        repo.getYearAggregations(selectedYear),
+        repo.getYearBreakDays(selectedYear),
+      ]);
       setAggregations(aggs);
+      setBreakDays(breaks);
     } catch (err) {
       console.error('Failed to load year data', err);
     } finally {
@@ -58,8 +63,8 @@ export default function IndexScreen() {
 
   // Generate 365/366 day progress items - auto-freezes past days at end of day
   const days = useMemo(() => {
-    return generateYearDays(selectedYear, aggregations);
-  }, [selectedYear, aggregations]);
+    return generateYearDays(selectedYear, aggregations, breakDays);
+  }, [selectedYear, aggregations, breakDays]);
 
   // Compute Year stats
   const stats: YearStats = useMemo(() => {
@@ -75,8 +80,12 @@ export default function IndexScreen() {
   // Re-fetch when day is updated in modal
   const handleDayUpdated = async () => {
     try {
-      const aggs = await repo.getYearAggregations(selectedYear);
+      const [aggs, breaks] = await Promise.all([
+        repo.getYearAggregations(selectedYear),
+        repo.getYearBreakDays(selectedYear),
+      ]);
       setAggregations(aggs);
+      setBreakDays(breaks);
 
       // Also update selectedDay reference
       if (selectedDay) {
@@ -84,6 +93,7 @@ export default function IndexScreen() {
         const totalTasks = todayAgg.total;
         const completedTasks = todayAgg.completed;
         const progress = totalTasks > 0 ? completedTasks / totalTasks : 0;
+        const isBreak = breaks.has(selectedDay.date_str);
         setSelectedDay((prev) =>
           prev
             ? {
@@ -91,6 +101,7 @@ export default function IndexScreen() {
                 totalTasks,
                 completedTasks,
                 progress,
+                isBreakDay: isBreak,
               }
             : null
         );
@@ -139,15 +150,15 @@ export default function IndexScreen() {
         />
       )}
 
-      {/* Quick floating "Add Task" button */}
+      {/* Quick floating "Today" button */}
       {selectedYear === currentActualYear && (
         <TouchableOpacity
           style={[styles.floatingTodayBtn, { backgroundColor: '#0A84FF' }]}
           activeOpacity={0.85}
           onPress={handleJumpToToday}
         >
-          <MaterialCommunityIcons name="plus" size={18} color="#FFFFFF" />
-          <Text style={styles.floatingTodayText}>Add Task</Text>
+          <MaterialCommunityIcons name="target" size={18} color="#FFFFFF" />
+          <Text style={styles.floatingTodayText}>Today</Text>
         </TouchableOpacity>
       )}
 

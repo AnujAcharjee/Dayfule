@@ -185,4 +185,46 @@ export class TasksRepository {
     }
     return years.sort((a, b) => a - b);
   }
+
+  /**
+   * Fetches all break day date strings for a given year
+   */
+  async getYearBreakDays(year: number): Promise<Set<string>> {
+    const yearPattern = `${year}-%`;
+    const rows = await this.db.getAllAsync<{ date_str: string }>(
+      `SELECT date_str FROM break_days WHERE date_str LIKE ?`,
+      [yearPattern]
+    );
+    return new Set(rows.map((r) => r.date_str));
+  }
+
+  /**
+   * Checks if a date is marked as a break day
+   */
+  async isBreakDay(dateStr: string): Promise<boolean> {
+    const row = await this.db.getFirstAsync<{ date_str: string }>(
+      `SELECT date_str FROM break_days WHERE date_str = ?`,
+      [dateStr]
+    );
+    return !!row;
+  }
+
+  /**
+   * Toggles break day status for a date.
+   * Returns true if now a break day, false if unmarked.
+   */
+  async toggleBreakDay(dateStr: string): Promise<boolean> {
+    const exists = await this.isBreakDay(dateStr);
+    if (exists) {
+      await this.db.runAsync(`DELETE FROM break_days WHERE date_str = ?`, [dateStr]);
+      return false;
+    } else {
+      const now = new Date().toISOString();
+      await this.db.runAsync(
+        `INSERT INTO break_days (date_str, created_at) VALUES (?, ?)`,
+        [dateStr, now]
+      );
+      return true;
+    }
+  }
 }

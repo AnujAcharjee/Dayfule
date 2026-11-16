@@ -42,6 +42,14 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [showEditor, setShowEditor] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
+  const [isBreakDay, setIsBreakDay] = useState(day?.isBreakDay || false);
+
+  // Sync break day state when day changes
+  useEffect(() => {
+    if (day) {
+      setIsBreakDay(day.isBreakDay);
+    }
+  }, [day?.isBreakDay]);
 
   // Load tasks for this day
   const loadTasks = useCallback(async () => {
@@ -89,6 +97,18 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
       }
     } catch (err) {
       console.error('Toggle error', err);
+    }
+  };
+
+  // Toggle break day status
+  const handleToggleBreakDay = async () => {
+    if (day.isFrozen) return;
+    try {
+      const nowBreak = await repo.toggleBreakDay(day.date_str);
+      setIsBreakDay(nowBreak);
+      onDayUpdated();
+    } catch (err) {
+      console.error('Toggle break day error', err);
     }
   };
 
@@ -164,11 +184,18 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                   {formatFullDate(day.date_str)}
                 </Text>
 
-                {/* Status tag */}
+                {/* Status tags */}
                 <View style={styles.tagRow}>
                   {day.isToday && (
                     <View style={[styles.statusTag, { backgroundColor: '#FF2D55' }]}>
                       <Text style={styles.todayTagText}>TODAY</Text>
+                    </View>
+                  )}
+
+                  {isBreakDay && (
+                    <View style={[styles.statusTag, { backgroundColor: '#C2185B' }]}>
+                      <MaterialCommunityIcons name="coffee" size={10} color="#FFFFFF" style={{ marginRight: 2 }} />
+                      <Text style={styles.todayTagText}>BREAK DAY</Text>
                     </View>
                   )}
 
@@ -211,11 +238,15 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                 styles.compactActionBar,
                 {
                   backgroundColor: colors.card,
-                  borderColor: isPerfect ? '#2ECC71' : colors.cardBorder,
+                  borderColor: isBreakDay
+                    ? '#C2185B'
+                    : isPerfect
+                    ? '#2ECC71'
+                    : colors.cardBorder,
                 },
               ]}
             >
-              {/* Day Loader Ring (Rainbow Progress Arc) */}
+              {/* Day Loader Ring: Full round dark pink if break day, or rainbow arc */}
               <View style={styles.loaderWrapper}>
                 <Svg width={loaderSize} height={loaderSize}>
                   <Defs>
@@ -227,32 +258,48 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                       <Stop offset="100%" stopColor="#AF52DE" />
                     </SvgLinearGradient>
                   </Defs>
-                  <Circle
-                    cx={loaderSize / 2}
-                    cy={loaderSize / 2}
-                    r={radius}
-                    stroke={mode === 'dark' ? '#2A2A38' : '#E2E8F0'}
-                    strokeWidth={strokeWidth}
-                    fill="transparent"
-                  />
-                  {totalCount > 0 && progressRatio > 0 && (
+
+                  {isBreakDay ? (
                     <Circle
                       cx={loaderSize / 2}
                       cy={loaderSize / 2}
                       r={radius}
-                      stroke="url(#modalDayGrad)"
+                      stroke="#880E4F"
                       strokeWidth={strokeWidth}
-                      strokeDasharray={circumference}
-                      strokeDashoffset={strokeDashoffset}
-                      strokeLinecap="round"
-                      fill="transparent"
-                      transform={`rotate(-90 ${loaderSize / 2} ${loaderSize / 2})`}
+                      fill="#C2185B"
                     />
+                  ) : (
+                    <>
+                      <Circle
+                        cx={loaderSize / 2}
+                        cy={loaderSize / 2}
+                        r={radius}
+                        stroke={mode === 'dark' ? '#2A2A38' : '#E2E8F0'}
+                        strokeWidth={strokeWidth}
+                        fill="transparent"
+                      />
+                      {totalCount > 0 && progressRatio > 0 && (
+                        <Circle
+                          cx={loaderSize / 2}
+                          cy={loaderSize / 2}
+                          r={radius}
+                          stroke="url(#modalDayGrad)"
+                          strokeWidth={strokeWidth}
+                          strokeDasharray={circumference}
+                          strokeDashoffset={strokeDashoffset}
+                          strokeLinecap="round"
+                          fill="transparent"
+                          transform={`rotate(-90 ${loaderSize / 2} ${loaderSize / 2})`}
+                        />
+                      )}
+                    </>
                   )}
                 </Svg>
                 <View style={StyleSheet.absoluteFill} pointerEvents="none">
                   <View style={styles.loaderCenter}>
-                    {isPerfect ? (
+                    {isBreakDay ? (
+                      <MaterialCommunityIcons name="coffee" size={17} color="#FFFFFF" />
+                    ) : isPerfect ? (
                       <MaterialCommunityIcons name="check-bold" size={15} color="#2ECC71" />
                     ) : (
                       <Text style={[styles.loaderPctText, { color: colors.text }]}>
@@ -266,32 +313,63 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
               {/* Progress Summary Text */}
               <View style={styles.progressSummary}>
                 <Text style={[styles.progressTitle, { color: colors.text }]}>
-                  {totalCount === 0
+                  {isBreakDay
+                    ? 'Break Day Active'
+                    : totalCount === 0
                     ? 'No tasks yet'
                     : isPerfect
                     ? 'All completed!'
                     : `${completedCount} of ${totalCount} done`}
                 </Text>
                 <Text style={[styles.progressSubtitle, { color: colors.textSecondary }]}>
-                  {totalCount === 0
-                    ? 'Plan your day below'
+                  {isBreakDay
+                    ? 'Resting today · Streaks kept'
+                    : totalCount === 0
+                    ? 'Plan your day or take a break'
                     : `${progressPct}% daily progress`}
                 </Text>
               </View>
 
-              {/* Solid Blue Add Task Button */}
+              {/* Action Buttons: Mark Break Day & Add Task */}
               {!day.isFrozen && (
-                <TouchableOpacity
-                  activeOpacity={0.8}
-                  style={styles.blueAddButton}
-                  onPress={() => {
-                    setEditingTask(null);
-                    setShowEditor(true);
-                  }}
-                >
-                  <MaterialCommunityIcons name="plus" size={17} color="#FFFFFF" />
-                  <Text style={styles.blueAddButtonText}>Add Task</Text>
-                </TouchableOpacity>
+                <View style={styles.actionButtonsRow}>
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    style={[
+                      styles.breakButton,
+                      isBreakDay
+                        ? { backgroundColor: '#C2185B', borderColor: '#880E4F' }
+                        : { backgroundColor: colors.surfaceHover, borderColor: colors.surfaceBorder },
+                    ]}
+                    onPress={handleToggleBreakDay}
+                  >
+                    <MaterialCommunityIcons
+                      name={isBreakDay ? 'coffee' : 'coffee-outline'}
+                      size={15}
+                      color={isBreakDay ? '#FFFFFF' : colors.textSecondary}
+                    />
+                    <Text
+                      style={[
+                        styles.breakButtonText,
+                        { color: isBreakDay ? '#FFFFFF' : colors.textSecondary },
+                      ]}
+                    >
+                      {isBreakDay ? 'Break' : 'Break'}
+                    </Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    style={styles.blueAddButton}
+                    onPress={() => {
+                      setEditingTask(null);
+                      setShowEditor(true);
+                    }}
+                  >
+                    <MaterialCommunityIcons name="plus" size={16} color="#FFFFFF" />
+                    <Text style={styles.blueAddButtonText}>Add Task</Text>
+                  </TouchableOpacity>
+                </View>
               )}
             </View>
 
@@ -333,20 +411,42 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                   color={colors.textMuted}
                 />
                 <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-                  No tasks recorded for this day.
+                  {isBreakDay ? 'No tasks needed for today. Enjoy your break!' : 'No tasks recorded for this day.'}
                 </Text>
                 {!day.isFrozen && (
-                  <TouchableOpacity
-                    style={styles.emptyBlueAddBtn}
-                    activeOpacity={0.8}
-                    onPress={() => {
-                      setEditingTask(null);
-                      setShowEditor(true);
-                    }}
-                  >
-                    <MaterialCommunityIcons name="plus" size={18} color="#FFFFFF" />
-                    <Text style={styles.emptyBlueAddBtnText}>Add Task</Text>
-                  </TouchableOpacity>
+                  <View style={{ flexDirection: 'row', gap: 10, marginTop: 10 }}>
+                    <TouchableOpacity
+                      style={[
+                        styles.emptyBreakBtn,
+                        isBreakDay
+                          ? { backgroundColor: '#C2185B' }
+                          : { backgroundColor: colors.surfaceHover, borderColor: colors.surfaceBorder, borderWidth: 1 },
+                      ]}
+                      activeOpacity={0.8}
+                      onPress={handleToggleBreakDay}
+                    >
+                      <MaterialCommunityIcons
+                        name={isBreakDay ? 'check' : 'coffee'}
+                        size={17}
+                        color={isBreakDay ? '#FFFFFF' : colors.text}
+                      />
+                      <Text style={[styles.emptyBreakBtnText, { color: isBreakDay ? '#FFFFFF' : colors.text }]}>
+                        {isBreakDay ? 'Break Day Active' : 'Take a Break'}
+                      </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={styles.emptyBlueAddBtn}
+                      activeOpacity={0.8}
+                      onPress={() => {
+                        setEditingTask(null);
+                        setShowEditor(true);
+                      }}
+                    >
+                      <MaterialCommunityIcons name="plus" size={17} color="#FFFFFF" />
+                      <Text style={styles.emptyBlueAddBtnText}>Add Task</Text>
+                    </TouchableOpacity>
+                  </View>
                 )}
               </View>
             ) : (
@@ -444,6 +544,8 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   statusTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 7,
     paddingVertical: 2,
     borderRadius: 5,
@@ -523,12 +625,30 @@ const styles = StyleSheet.create({
     fontSize: 11,
     marginTop: 1,
   },
+  actionButtonsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  breakButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+    borderRadius: 10,
+    borderWidth: 1,
+  },
+  breakButtonText: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
   blueAddButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
     backgroundColor: '#0A84FF',
-    paddingHorizontal: 14,
+    paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 10,
   },
@@ -574,19 +694,31 @@ const styles = StyleSheet.create({
   emptyText: {
     fontSize: 14,
     marginTop: 2,
+    textAlign: 'center',
   },
-  emptyBlueAddBtn: {
-    marginTop: 10,
+  emptyBreakBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 18,
-    paddingVertical: 10,
-    borderRadius: 12,
+    gap: 5,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    borderRadius: 11,
+  },
+  emptyBreakBtnText: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  emptyBlueAddBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+    borderRadius: 11,
     backgroundColor: '#0A84FF',
   },
   emptyBlueAddBtnText: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '700',
     color: '#FFFFFF',
   },

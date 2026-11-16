@@ -57,7 +57,8 @@ export const WEEKDAY_NAMES_SHORT = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
  */
 export function generateYearDays(
   year: number,
-  taskAggregations: Record<string, { total: number; completed: number }> = {}
+  taskAggregations: Record<string, { total: number; completed: number }> = {},
+  breakDays: Set<string> = new Set()
 ): DayProgress[] {
   const days: DayProgress[] = [];
   const todayKey = getTodayKey();
@@ -77,6 +78,7 @@ export function generateYearDays(
     const isPast = dateStr < todayKey;
     const isFuture = dateStr > todayKey;
     const isFrozen = isPast; // Day freezes automatically at the end of the day
+    const isBreakDay = breakDays.has(dateStr);
 
     days.push({
       date_str: dateStr,
@@ -91,6 +93,7 @@ export function generateYearDays(
       isPast,
       isFuture,
       isFrozen,
+      isBreakDay,
     });
 
     // Advance to next day
@@ -143,9 +146,9 @@ export function calculateYearStats(year: number, days: DayProgress[]): YearStats
     completedTasks += day.completedTasks;
 
     const hadTasks = day.totalTasks > 0;
-    const isPerfect = hadTasks && day.completedTasks === day.totalTasks;
+    const isPerfect = (hadTasks && day.completedTasks === day.totalTasks) || day.isBreakDay;
 
-    if (hadTasks) {
+    if (hadTasks || day.isBreakDay) {
       activeDays++;
     }
 
