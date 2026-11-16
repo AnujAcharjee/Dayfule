@@ -10,7 +10,6 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Circle, Defs, LinearGradient as SvgLinearGradient, Stop } from 'react-native-svg';
 import { useSQLiteContext } from 'expo-sqlite';
 import { DayProgress, Task, TaskPriority } from '@/types';
@@ -20,7 +19,6 @@ import { TaskItem } from './TaskItem';
 import { TaskEditorModal } from './TaskEditorModal';
 import { RainbowCelebration } from './RainbowCelebration';
 import { formatFullDate } from '@/utils/dateUtils';
-import { RAINBOW_STOPS } from '@/utils/colors';
 
 interface DayDetailModalProps {
   day: DayProgress | null;
@@ -317,7 +315,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
               {!day.isFrozen && (
                 <TouchableOpacity
                   activeOpacity={0.8}
-                  style={styles.addButton}
+                  style={[styles.addButton, { backgroundColor: '#0A84FF' }]}
                   onPress={() => {
                     setEditingTask(null);
                     setShowEditor(true);
@@ -346,14 +344,15 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                 </Text>
                 {!day.isFrozen && (
                   <TouchableOpacity
-                    style={styles.emptyAddBtn}
+                    style={[styles.emptyAddBtn, { backgroundColor: '#0A84FF' }]}
                     onPress={() => {
                       setEditingTask(null);
                       setShowEditor(true);
                     }}
                   >
+                    <MaterialCommunityIcons name="plus" size={16} color="#FFFFFF" />
                     <Text style={styles.emptyAddBtnText}>
-                      + Add Task
+                      Add Task
                     </Text>
                   </TouchableOpacity>
                 )}
@@ -584,14 +583,17 @@ const styles = StyleSheet.create({
     marginTop: 4,
   },
   emptyAddBtn: {
-    marginTop: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 9,
-    borderRadius: 10,
+    marginTop: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 18,
+    paddingVertical: 10,
+    borderRadius: 12,
     backgroundColor: '#0A84FF',
   },
   emptyAddBtnText: {
-    fontSize: 13,
+    fontSize: 14,
     fontWeight: '700',
     color: '#FFFFFF',
   },

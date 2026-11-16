@@ -187,7 +187,7 @@ export const TaskEditorModal: React.FC<TaskEditorModalProps> = ({
             {/* Save Button */}
             <TouchableOpacity
               activeOpacity={0.85}
-              style={styles.saveButton}
+              style={[styles.saveButton, { backgroundColor: '#0A84FF' }]}
               onPress={handleSave}
             >
               <Text style={styles.saveText}>

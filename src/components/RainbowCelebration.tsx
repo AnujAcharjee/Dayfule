@@ -187,17 +187,10 @@ export const RainbowCelebration: React.FC<RainbowCelebrationProps> = ({
           >
             {/* Inner Content Card */}
             <View style={[styles.cardContent, { backgroundColor: colors.surface }]}>
-              {/* Rainbow Icon Badge */}
-              <LinearGradient
-                colors={['#FF2D55', '#FFA500', '#2ECC71', '#00C9FF', '#8A2387']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.iconCircle}
-              >
-                <View style={[styles.innerIconCircle, { backgroundColor: colors.surface }]}>
-                  <MaterialCommunityIcons name="trophy-variant" size={38} color="#FFD700" />
-                </View>
-              </LinearGradient>
+              {/* Icon Badge */}
+              <View style={[styles.iconCircle, { backgroundColor: colors.surfaceHover }]}>
+                <MaterialCommunityIcons name="trophy-variant" size={38} color="#FFD700" />
+              </View>
 
               {dateStr && (
                 <View style={[styles.datePill, { backgroundColor: colors.surfaceHover }]}>
@@ -214,15 +207,10 @@ export const RainbowCelebration: React.FC<RainbowCelebrationProps> = ({
 
               {/* Progress 100% Badge */}
               <View style={styles.badgeRow}>
-                <LinearGradient
-                  colors={['#2ECC71', '#00C9FF']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.pctBadge}
-                >
+                <View style={[styles.pctBadge, { backgroundColor: '#2ECC71' }]}>
                   <MaterialCommunityIcons name="check-all" size={16} color="#FFFFFF" />
                   <Text style={styles.pctText}>100% COMPLETE</Text>
-                </LinearGradient>
+                </View>
               </View>
 
               {/* Close Button */}
@@ -274,20 +262,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   iconCircle: {
-    width: 76,
-    height: 76,
-    borderRadius: 38,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
-    padding: 3,
-  },
-  innerIconCircle: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    alignItems: 'center',
-    justifyContent: 'center',
   },
   datePill: {
     paddingHorizontal: 12,

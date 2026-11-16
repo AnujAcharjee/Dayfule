@@ -139,15 +139,15 @@ export default function IndexScreen() {
         />
       )}
 
-      {/* Quick floating "Today" button if in current year */}
+      {/* Quick floating "Add Task" button */}
       {selectedYear === currentActualYear && (
         <TouchableOpacity
-          style={styles.floatingTodayBtn}
+          style={[styles.floatingTodayBtn, { backgroundColor: '#0A84FF' }]}
           activeOpacity={0.85}
           onPress={handleJumpToToday}
         >
-          <MaterialCommunityIcons name="target" size={18} color="#FFFFFF" />
-          <Text style={styles.floatingTodayText}>Today</Text>
+          <MaterialCommunityIcons name="plus" size={18} color="#FFFFFF" />
+          <Text style={styles.floatingTodayText}>Add Task</Text>
         </TouchableOpacity>
       )}
 
