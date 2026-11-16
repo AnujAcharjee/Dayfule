@@ -37,7 +37,7 @@ export default function RootLayout() {
             </View>
           }
         >
-          <SQLiteProvider databaseName="taskfule.db" onInit={initializeDatabase}>
+          <SQLiteProvider databaseName="dayfule.db" onInit={initializeDatabase}>
             <RootLayoutContent />
           </SQLiteProvider>
         </React.Suspense>

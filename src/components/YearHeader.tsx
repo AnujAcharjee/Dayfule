@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Platform } from 'react-native';
+import Svg, { Defs, LinearGradient as SvgLinearGradient, Stop, Text as SvgText } from 'react-native-svg';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { YearStats } from '@/types';
 import { useTheme } from '@/context/ThemeContext';
@@ -49,7 +50,38 @@ export const YearHeader: React.FC<YearHeaderProps> = ({
       {/* Top brand & controls row */}
       <View style={styles.topRow}>
         <View style={styles.brandContainer}>
-          <Text style={[styles.brandTitle, { color: '#FF5E3A' }]}>TASKFULE</Text>
+          <Svg height={32} width={135} viewBox="0 0 135 32">
+            <Defs>
+              <SvgLinearGradient id="dayfuleOrangeGrad" x1="0%" y1="0%" x2="100%" y2="50%">
+                <Stop offset="0%" stopColor="#FFA000" />
+                <Stop offset="45%" stopColor="#FF6D00" />
+                <Stop offset="100%" stopColor="#E65100" />
+              </SvgLinearGradient>
+            </Defs>
+            {/* Shading shadow layer with deep burnt orange */}
+            <SvgText
+              x="1"
+              y="25"
+              fontFamily={Platform.select({ ios: 'Georgia', android: 'serif', default: 'serif' })}
+              fontSize="25"
+              fontWeight="bold"
+              fill="#D84315"
+              opacity="0.35"
+            >
+              Dayfule
+            </SvgText>
+            {/* Main gradient text layer with orange shading */}
+            <SvgText
+              x="0"
+              y="24"
+              fontFamily={Platform.select({ ios: 'Georgia', android: 'serif', default: 'serif' })}
+              fontSize="25"
+              fontWeight="bold"
+              fill="url(#dayfuleOrangeGrad)"
+            >
+              Dayfule
+            </SvgText>
+          </Svg>
         </View>
 
         <View style={styles.topActions}>

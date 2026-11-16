@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "TaskFule",
-    "slug": "TaskFule",
+    "name": "Dayfule",
+    "slug": "dayfule",
     "version": "1.0.0",
-    "scheme": "taskfule",
+    "scheme": "dayfule",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
@@ -18,7 +18,7 @@
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.taskfule.app"
+      "package": "com.dayfule.app"
     },
     "web": {
       "favicon": "./assets/favicon.png"

@@ -1,4 +1,4 @@
-# TaskFule 🎯
+# Dayfule 🎯
 
 A minimalist, high-productivity mobile application built with **React Native (Expo SDK 58)** and **Expo Router** to plan daily todos and track your entire year's productivity in a single, unified view.
 

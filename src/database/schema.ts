@@ -38,4 +38,18 @@ export async function initializeDatabase(db: SQLiteDatabase): Promise<void> {
       created_at TEXT NOT NULL
     );
   `);
+
+  // Seamlessly import historical records from taskfule.db if transitioning from previous database
+  try {
+    await db.execAsync(`
+      ATTACH DATABASE 'taskfule.db' AS legacy_db;
+      INSERT OR IGNORE INTO tasks SELECT * FROM legacy_db.tasks;
+      INSERT OR IGNORE INTO break_days SELECT * FROM legacy_db.break_days;
+      INSERT OR IGNORE INTO year_archives SELECT * FROM legacy_db.year_archives;
+      INSERT OR IGNORE INTO app_settings SELECT * FROM legacy_db.app_settings;
+      DETACH DATABASE legacy_db;
+    `);
+  } catch {
+    // If legacy_db does not exist or fails to attach, ignore safely
+  }
 }
