@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { YearStats } from '@/types';
 import { useTheme } from '@/context/ThemeContext';
+import { isLeapYear } from '@/utils/dateUtils';
 
 interface YearHeaderProps {
   year: number;
@@ -22,6 +23,26 @@ export const YearHeader: React.FC<YearHeaderProps> = ({
   onToggleViewMode,
 }) => {
   const { colors, mode, toggleTheme } = useTheme();
+
+  const currentActualYear = new Date().getFullYear();
+  const totalDaysInYear = stats.totalDays || (isLeapYear(year) ? 366 : 365);
+
+  let daysElapsed = 0;
+  let yearProgressPct = 0;
+
+  if (year < currentActualYear) {
+    // Past years are 100% completed
+    daysElapsed = totalDaysInYear;
+    yearProgressPct = 100;
+  } else if (year > currentActualYear) {
+    // Future years haven't elapsed
+    daysElapsed = 0;
+    yearProgressPct = 0;
+  } else {
+    // Current year
+    daysElapsed = Math.min(stats.daysPassed, totalDaysInYear);
+    yearProgressPct = Math.round((daysElapsed / totalDaysInYear) * 100);
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
@@ -85,14 +106,22 @@ export const YearHeader: React.FC<YearHeaderProps> = ({
         </TouchableOpacity>
       </View>
 
-      {/* Year Overall Progress Bar */}
+      {/* Year Elapsed Progress Bar & Percentage */}
       <View style={styles.progressSection}>
+        <View style={styles.progressHeader}>
+          <Text style={[styles.progressLabel, { color: colors.textSecondary }]}>
+            Year Elapsed
+          </Text>
+          <Text style={[styles.progressPct, { color: colors.text }]}>
+            {yearProgressPct}% ({daysElapsed}/{totalDaysInYear} days)
+          </Text>
+        </View>
         <View style={styles.progressBarBg}>
           <View
             style={[
               styles.progressBarFill,
               {
-                width: `${Math.max(stats.completionRate, stats.totalTasks > 0 ? 3 : 0)}%`,
+                width: `${Math.max(yearProgressPct, year === currentActualYear && daysElapsed > 0 ? 2 : 0)}%`,
                 backgroundColor: '#0A84FF',
               },
             ]}
@@ -106,7 +135,7 @@ export const YearHeader: React.FC<YearHeaderProps> = ({
           <Text style={[styles.statValue, { color: colors.text }]}>
             {stats.completionRate}%
           </Text>
-          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Completion</Text>
+          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Task Success</Text>
         </View>
 
         <View style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.surfaceBorder }]}>
@@ -188,7 +217,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 10,
   },
   navButton: {
     width: 38,
@@ -206,17 +235,34 @@ const styles = StyleSheet.create({
     letterSpacing: -1,
   },
   progressSection: {
-    marginBottom: 12,
+    marginBottom: 14,
+  },
+  progressHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  progressLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+  },
+  progressPct: {
+    fontSize: 12,
+    fontWeight: '800',
+    letterSpacing: -0.2,
   },
   progressBarBg: {
-    height: 6,
-    borderRadius: 3,
+    height: 7,
+    borderRadius: 4,
     backgroundColor: 'rgba(128, 128, 128, 0.2)',
     overflow: 'hidden',
   },
   progressBarFill: {
     height: '100%',
-    borderRadius: 3,
+    borderRadius: 4,
   },
   statsGrid: {
     flexDirection: 'row',
