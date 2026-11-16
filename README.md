@@ -92,6 +92,21 @@ eas build --platform android --profile production
 - **Framework**: [Expo SDK 58](https://expo.dev) (React Native 0.88, React 19)
 - **Routing**: [Expo Router v58](https://docs.expo.dev/router/introduction/)
 - **Database**: [expo-sqlite](https://docs.expo.dev/versions/latest/sdk/sqlite/)
+- **Widgets**: `react-native-android-widget` (Android Home Screen Widgets)
 - **Graphics & Vectors**: `react-native-svg`, `@expo/vector-icons`, `expo-linear-gradient`
 - **Haptics**: `expo-haptics`
 - **Build System**: EAS Build (Continuous Native Generation)
+
+---
+
+## 👤 Author
+
+**Anuj Acharjee**
+- Email: [anujacharjee37@gmail.com](mailto:anujacharjee37@gmail.com)
+- GitHub: [@AnujAcharjee](https://github.com/AnujAcharjee)
+
+---
+
+## 📄 License
+
+This project is open-source and licensed under the [MIT License](LICENSE) © 2026 Anuj Acharjee.

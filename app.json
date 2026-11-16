@@ -3,6 +3,7 @@
     "name": "Dayfule",
     "slug": "dayfule",
     "version": "1.0.0",
+    "description": "Minimalist single-page year productivity tracker and daily todo app for mobile",
     "scheme": "dayfule",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

@@ -1,6 +1,9 @@
 {
   "name": "dayfule",
   "version": "1.0.0",
+  "description": "Minimalist single-page year productivity tracker and daily todo app for mobile",
+  "author": "Anuj Acharjee <anujacharjee37@gmail.com>",
+  "license": "MIT",
   "main": "expo-router/entry",
   "dependencies": {
     "@expo/vector-icons": "^15.0.2",
