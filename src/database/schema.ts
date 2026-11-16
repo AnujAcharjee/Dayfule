@@ -37,6 +37,11 @@ export async function initializeDatabase(db: SQLiteDatabase): Promise<void> {
       date_str TEXT PRIMARY KEY NOT NULL,
       created_at TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS exam_days (
+      date_str TEXT PRIMARY KEY NOT NULL,
+      created_at TEXT NOT NULL
+    );
   `);
 
   // Seamlessly import historical records from taskfule.db if transitioning from previous database

@@ -65,15 +65,25 @@ export const DayLoader: React.FC<DayLoaderProps> = React.memo(({
             </LinearGradient>
           </Defs>
 
-          {/* If Break Day: full round dark pink */}
+          {/* If Break Day: full round pink #FF8DA1 */}
           {day.isBreakDay ? (
             <Circle
               cx={size / 2}
               cy={size / 2}
               r={radius}
-              stroke="#880E4F"
+              stroke="#FF8DA1"
               strokeWidth={strokeWidth}
-              fill="#C2185B"
+              fill="#FF8DA1"
+            />
+          ) : day.isExamDay ? (
+            /* If Exam Day: full round yellow #FFD600 */
+            <Circle
+              cx={size / 2}
+              cy={size / 2}
+              r={radius}
+              stroke="#FFD600"
+              strokeWidth={strokeWidth}
+              fill="#FFD600"
             />
           ) : (
             <>
@@ -128,6 +138,27 @@ export const DayLoader: React.FC<DayLoaderProps> = React.memo(({
                   name="coffee"
                   size={Math.max(9, size * 0.44)}
                   color="#FFFFFF"
+                />
+              )
+            ) : day.isExamDay ? (
+              showDayNumber ? (
+                <Text
+                  style={[
+                    styles.dayText,
+                    {
+                      fontSize: Math.max(8, size * 0.36),
+                      color: '#000000',
+                      fontWeight: '800',
+                    },
+                  ]}
+                >
+                  {day.dayOfMonth}
+                </Text>
+              ) : (
+                <MaterialCommunityIcons
+                  name="school"
+                  size={Math.max(9, size * 0.44)}
+                  color="#000000"
                 />
               )
             ) : isPerfect ? (

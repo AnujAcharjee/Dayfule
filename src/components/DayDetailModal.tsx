@@ -43,13 +43,15 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
   const [showEditor, setShowEditor] = useState(false);
   const [showCelebration, setShowCelebration] = useState(false);
   const [isBreakDay, setIsBreakDay] = useState(day?.isBreakDay || false);
+  const [isExamDay, setIsExamDay] = useState(day?.isExamDay || false);
 
-  // Sync break day state when day changes
+  // Sync break & exam day state when day changes
   useEffect(() => {
     if (day) {
       setIsBreakDay(day.isBreakDay);
+      setIsExamDay(day.isExamDay);
     }
-  }, [day?.isBreakDay]);
+  }, [day?.isBreakDay, day?.isExamDay]);
 
   // Load tasks for this day
   const loadTasks = useCallback(async () => {
@@ -106,9 +108,23 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
     try {
       const nowBreak = await repo.toggleBreakDay(day.date_str);
       setIsBreakDay(nowBreak);
+      if (nowBreak) setIsExamDay(false);
       onDayUpdated();
     } catch (err) {
       console.error('Toggle break day error', err);
+    }
+  };
+
+  // Toggle exam day status
+  const handleToggleExamDay = async () => {
+    if (day.isFrozen) return;
+    try {
+      const nowExam = await repo.toggleExamDay(day.date_str);
+      setIsExamDay(nowExam);
+      if (nowExam) setIsBreakDay(false);
+      onDayUpdated();
+    } catch (err) {
+      console.error('Toggle exam day error', err);
     }
   };
 
@@ -155,8 +171,8 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
   };
 
   // Compact Header Loader Ring metrics
-  const loaderSize = 42;
-  const strokeWidth = 4;
+  const loaderSize = 38;
+  const strokeWidth = 3.5;
   const radius = (loaderSize - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
   const strokeDashoffset = circumference - progressRatio * circumference;
@@ -186,16 +202,17 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
 
                 {/* Status tags */}
                 <View style={styles.tagRow}>
-                  {day.isToday && (
-                    <View style={[styles.statusTag, { backgroundColor: '#0A84FF' }]}>
-                      <Text style={styles.todayTagText}>TODAY</Text>
+                  {isBreakDay && (
+                    <View style={[styles.statusTag, { backgroundColor: '#FF8DA1' }]}>
+                      <MaterialCommunityIcons name="coffee" size={10} color="#FFFFFF" style={{ marginRight: 2 }} />
+                      <Text style={[styles.todayTagText, { color: '#FFFFFF' }]}>BREAK DAY</Text>
                     </View>
                   )}
 
-                  {isBreakDay && (
-                    <View style={[styles.statusTag, { backgroundColor: '#C2185B' }]}>
-                      <MaterialCommunityIcons name="coffee" size={10} color="#FFFFFF" style={{ marginRight: 2 }} />
-                      <Text style={styles.todayTagText}>BREAK DAY</Text>
+                  {isExamDay && (
+                    <View style={[styles.statusTag, { backgroundColor: '#FFD600' }]}>
+                      <MaterialCommunityIcons name="school" size={11} color="#000000" style={{ marginRight: 2 }} />
+                      <Text style={[styles.todayTagText, { color: '#000000' }]}>EXAM DAY</Text>
                     </View>
                   )}
 
@@ -239,14 +256,16 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                 {
                   backgroundColor: colors.card,
                   borderColor: isBreakDay
-                    ? '#C2185B'
+                    ? '#FF8DA1'
+                    : isExamDay
+                    ? '#FFD600'
                     : isPerfect
                     ? '#2ECC71'
                     : colors.cardBorder,
                 },
               ]}
             >
-              {/* Day Loader Ring: Full round dark pink if break day, or rainbow arc */}
+              {/* Day Loader Ring: Full round pink if break day, yellow if exam day, or rainbow arc */}
               <View style={styles.loaderWrapper}>
                 <Svg width={loaderSize} height={loaderSize}>
                   <Defs>
@@ -264,9 +283,18 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                       cx={loaderSize / 2}
                       cy={loaderSize / 2}
                       r={radius}
-                      stroke="#880E4F"
+                      stroke="#FF8DA1"
                       strokeWidth={strokeWidth}
-                      fill="#C2185B"
+                      fill="#FF8DA1"
+                    />
+                  ) : isExamDay ? (
+                    <Circle
+                      cx={loaderSize / 2}
+                      cy={loaderSize / 2}
+                      r={radius}
+                      stroke="#FFD600"
+                      strokeWidth={strokeWidth}
+                      fill="#FFD600"
                     />
                   ) : (
                     <>
@@ -298,7 +326,9 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                 <View style={StyleSheet.absoluteFill} pointerEvents="none">
                   <View style={styles.loaderCenter}>
                     {isBreakDay ? (
-                      <MaterialCommunityIcons name="coffee" size={17} color="#FFFFFF" />
+                      <MaterialCommunityIcons name="coffee" size={16} color="#FFFFFF" />
+                    ) : isExamDay ? (
+                      <MaterialCommunityIcons name="school" size={16} color="#000000" />
                     ) : isPerfect ? (
                       <MaterialCommunityIcons name="check-bold" size={15} color="#2ECC71" />
                     ) : (
@@ -310,34 +340,62 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                 </View>
               </View>
 
-              {/* Action Buttons: Mark Break Day & Add Task */}
+              {/* Action Buttons: Break, Exams, Add Task (All on One Single Line) */}
               {!day.isFrozen && (
                 <View style={styles.actionButtonsRow}>
+                  {/* Break button in pink #FF8DA1 */}
                   <TouchableOpacity
                     activeOpacity={0.8}
                     style={[
-                      styles.breakButton,
+                      styles.actionBtn,
                       isBreakDay
-                        ? { backgroundColor: '#C2185B', borderColor: '#C2185B' }
-                        : { backgroundColor: 'transparent', borderColor: '#C2185B' },
+                        ? { backgroundColor: '#FF8DA1', borderColor: '#FF8DA1' }
+                        : { backgroundColor: 'transparent', borderColor: '#FF8DA1' },
                     ]}
                     onPress={handleToggleBreakDay}
                   >
                     <MaterialCommunityIcons
                       name={isBreakDay ? 'coffee' : 'coffee-outline'}
-                      size={15}
-                      color={isBreakDay ? '#FFFFFF' : '#C2185B'}
+                      size={13}
+                      color={isBreakDay ? '#FFFFFF' : '#FF8DA1'}
                     />
                     <Text
                       style={[
-                        styles.breakButtonText,
-                        { color: isBreakDay ? '#FFFFFF' : '#C2185B' },
+                        styles.actionBtnText,
+                        { color: isBreakDay ? '#FFFFFF' : '#FF8DA1' },
                       ]}
                     >
-                      {isBreakDay ? 'Break' : 'Break'}
+                      Break
                     </Text>
                   </TouchableOpacity>
 
+                  {/* Exams button in yellow #FFD600 */}
+                  <TouchableOpacity
+                    activeOpacity={0.8}
+                    style={[
+                      styles.actionBtn,
+                      isExamDay
+                        ? { backgroundColor: '#FFD600', borderColor: '#FFD600' }
+                        : { backgroundColor: 'transparent', borderColor: '#FFD600' },
+                    ]}
+                    onPress={handleToggleExamDay}
+                  >
+                    <MaterialCommunityIcons
+                      name={isExamDay ? 'school' : 'school-outline'}
+                      size={13}
+                      color={isExamDay ? '#000000' : '#FFD600'}
+                    />
+                    <Text
+                      style={[
+                        styles.actionBtnText,
+                        { color: isExamDay ? '#000000' : '#FFD600' },
+                      ]}
+                    >
+                      Exams
+                    </Text>
+                  </TouchableOpacity>
+
+                  {/* Add Task button in solid blue #0A84FF */}
                   <TouchableOpacity
                     activeOpacity={0.8}
                     style={styles.blueAddButton}
@@ -346,7 +404,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                       setShowEditor(true);
                     }}
                   >
-                    <MaterialCommunityIcons name="plus" size={16} color="#FFFFFF" />
+                    <MaterialCommunityIcons name="plus" size={14} color="#FFFFFF" />
                     <Text style={styles.blueAddButtonText}>Add Task</Text>
                   </TouchableOpacity>
                 </View>
@@ -391,27 +449,51 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                   color={colors.textMuted}
                 />
                 <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-                  {isBreakDay ? 'No tasks needed for today. Enjoy your break!' : 'No tasks recorded for this day.'}
+                  {isBreakDay
+                    ? 'No tasks needed for today. Enjoy your break!'
+                    : isExamDay
+                    ? 'Exam day active. Best of luck with your tests!'
+                    : 'No tasks recorded for this day.'}
                 </Text>
                 {!day.isFrozen && (
-                  <View style={{ flexDirection: 'row', gap: 10, marginTop: 10 }}>
+                  <View style={{ flexDirection: 'row', gap: 8, marginTop: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
                     <TouchableOpacity
                       style={[
                         styles.emptyBreakBtn,
                         isBreakDay
-                          ? { backgroundColor: '#C2185B', borderColor: '#C2185B' }
-                          : { backgroundColor: 'transparent', borderColor: '#C2185B' },
+                          ? { backgroundColor: '#FF8DA1', borderColor: '#FF8DA1' }
+                          : { backgroundColor: 'transparent', borderColor: '#FF8DA1' },
                       ]}
                       activeOpacity={0.8}
                       onPress={handleToggleBreakDay}
                     >
                       <MaterialCommunityIcons
                         name={isBreakDay ? 'check' : 'coffee'}
-                        size={17}
-                        color={isBreakDay ? '#FFFFFF' : '#C2185B'}
+                        size={16}
+                        color={isBreakDay ? '#FFFFFF' : '#FF8DA1'}
                       />
-                      <Text style={[styles.emptyBreakBtnText, { color: isBreakDay ? '#FFFFFF' : '#C2185B' }]}>
-                        {isBreakDay ? 'Break Day Active' : 'Take a Break'}
+                      <Text style={[styles.emptyBreakBtnText, { color: isBreakDay ? '#FFFFFF' : '#FF8DA1' }]}>
+                        {isBreakDay ? 'Break Active' : 'Break'}
+                      </Text>
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                      style={[
+                        styles.emptyExamBtn,
+                        isExamDay
+                          ? { backgroundColor: '#FFD600', borderColor: '#FFD600' }
+                          : { backgroundColor: 'transparent', borderColor: '#FFD600' },
+                      ]}
+                      activeOpacity={0.8}
+                      onPress={handleToggleExamDay}
+                    >
+                      <MaterialCommunityIcons
+                        name={isExamDay ? 'check' : 'school'}
+                        size={16}
+                        color={isExamDay ? '#000000' : '#FFD600'}
+                      />
+                      <Text style={[styles.emptyExamBtnText, { color: isExamDay ? '#000000' : '#FFD600' }]}>
+                        {isExamDay ? 'Exam Active' : 'Exams'}
                       </Text>
                     </TouchableOpacity>
 
@@ -423,7 +505,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                         setShowEditor(true);
                       }}
                     >
-                      <MaterialCommunityIcons name="plus" size={17} color="#FFFFFF" />
+                      <MaterialCommunityIcons name="plus" size={16} color="#FFFFFF" />
                       <Text style={styles.emptyBlueAddBtnText}>Add Task</Text>
                     </TouchableOpacity>
                   </View>
@@ -571,18 +653,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
     borderRadius: 14,
     borderWidth: 1,
     marginBottom: 10,
+    gap: 6,
   },
   loaderWrapper: {
     position: 'relative',
-    width: 42,
-    height: 42,
+    width: 38,
+    height: 38,
     alignItems: 'center',
     justifyContent: 'center',
+    flexShrink: 0,
   },
   loaderCenter: {
     flex: 1,
@@ -590,40 +674,44 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   loaderPctText: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '800',
     letterSpacing: -0.5,
   },
   actionButtonsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    justifyContent: 'flex-end',
+    gap: 5,
+    flexShrink: 1,
   },
-  breakButton: {
+  actionBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 11,
-    paddingVertical: 7,
-    borderRadius: 10,
+    gap: 3,
+    paddingHorizontal: 7,
+    paddingVertical: 5.5,
+    borderRadius: 8,
     borderWidth: 1.5,
+    flexShrink: 0,
   },
-  breakButtonText: {
-    fontSize: 12,
+  actionBtnText: {
+    fontSize: 11,
     fontWeight: '700',
   },
   blueAddButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 3,
     backgroundColor: '#0A84FF',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+    borderRadius: 8,
+    flexShrink: 0,
   },
   blueAddButtonText: {
     color: '#FFFFFF',
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: '700',
   },
   frozenBanner: {
@@ -668,27 +756,40 @@ const styles = StyleSheet.create({
   emptyBreakBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 14,
-    paddingVertical: 9,
-    borderRadius: 11,
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
     borderWidth: 1.5,
   },
   emptyBreakBtnText: {
-    fontSize: 13,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  emptyExamBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    borderWidth: 1.5,
+  },
+  emptyExamBtnText: {
+    fontSize: 12,
     fontWeight: '700',
   },
   emptyBlueAddBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 16,
-    paddingVertical: 9,
-    borderRadius: 11,
+    gap: 4,
+    paddingHorizontal: 13,
+    paddingVertical: 8,
+    borderRadius: 10,
     backgroundColor: '#0A84FF',
   },
   emptyBlueAddBtnText: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: '700',
     color: '#FFFFFF',
   },

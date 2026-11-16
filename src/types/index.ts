@@ -26,6 +26,7 @@ export interface DayProgress {
   isFuture: boolean;
   isFrozen: boolean;
   isBreakDay: boolean;
+  isExamDay: boolean;
 }
 
 export interface YearStats {

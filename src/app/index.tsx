@@ -34,6 +34,7 @@ export default function IndexScreen() {
     Record<string, { total: number; completed: number }>
   >({});
   const [breakDays, setBreakDays] = useState<Set<string>>(new Set());
+  const [examDays, setExamDays] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState<boolean>(true);
 
   // Selected day for modal
@@ -44,12 +45,14 @@ export default function IndexScreen() {
   const loadYearData = useCallback(async () => {
     setLoading(true);
     try {
-      const [aggs, breaks] = await Promise.all([
+      const [aggs, breaks, exams] = await Promise.all([
         repo.getYearAggregations(selectedYear),
         repo.getYearBreakDays(selectedYear),
+        repo.getYearExamDays(selectedYear),
       ]);
       setAggregations(aggs);
       setBreakDays(breaks);
+      setExamDays(exams);
     } catch (err) {
       console.error('Failed to load year data', err);
     } finally {
@@ -63,8 +66,8 @@ export default function IndexScreen() {
 
   // Generate 365/366 day progress items - auto-freezes past days at end of day
   const days = useMemo(() => {
-    return generateYearDays(selectedYear, aggregations, breakDays);
-  }, [selectedYear, aggregations, breakDays]);
+    return generateYearDays(selectedYear, aggregations, breakDays, examDays);
+  }, [selectedYear, aggregations, breakDays, examDays]);
 
   // Compute Year stats
   const stats: YearStats = useMemo(() => {
@@ -80,12 +83,14 @@ export default function IndexScreen() {
   // Re-fetch when day is updated in modal
   const handleDayUpdated = async () => {
     try {
-      const [aggs, breaks] = await Promise.all([
+      const [aggs, breaks, exams] = await Promise.all([
         repo.getYearAggregations(selectedYear),
         repo.getYearBreakDays(selectedYear),
+        repo.getYearExamDays(selectedYear),
       ]);
       setAggregations(aggs);
       setBreakDays(breaks);
+      setExamDays(exams);
 
       // Also update selectedDay reference
       if (selectedDay) {
@@ -94,6 +99,7 @@ export default function IndexScreen() {
         const completedTasks = todayAgg.completed;
         const progress = totalTasks > 0 ? completedTasks / totalTasks : 0;
         const isBreak = breaks.has(selectedDay.date_str);
+        const isExam = exams.has(selectedDay.date_str);
         setSelectedDay((prev) =>
           prev
             ? {
@@ -102,6 +108,7 @@ export default function IndexScreen() {
                 completedTasks,
                 progress,
                 isBreakDay: isBreak,
+                isExamDay: isExam,
               }
             : null
         );

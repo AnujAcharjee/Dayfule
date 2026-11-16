@@ -220,8 +220,52 @@ export class TasksRepository {
       return false;
     } else {
       const now = new Date().toISOString();
+      await this.db.runAsync(`DELETE FROM exam_days WHERE date_str = ?`, [dateStr]);
       await this.db.runAsync(
         `INSERT INTO break_days (date_str, created_at) VALUES (?, ?)`,
+        [dateStr, now]
+      );
+      return true;
+    }
+  }
+
+  /**
+   * Fetches all exam day date strings for a given year
+   */
+  async getYearExamDays(year: number): Promise<Set<string>> {
+    const yearPattern = `${year}-%`;
+    const rows = await this.db.getAllAsync<{ date_str: string }>(
+      `SELECT date_str FROM exam_days WHERE date_str LIKE ?`,
+      [yearPattern]
+    );
+    return new Set(rows.map((r) => r.date_str));
+  }
+
+  /**
+   * Checks if a date is marked as an exam day
+   */
+  async isExamDay(dateStr: string): Promise<boolean> {
+    const row = await this.db.getFirstAsync<{ date_str: string }>(
+      `SELECT date_str FROM exam_days WHERE date_str = ?`,
+      [dateStr]
+    );
+    return !!row;
+  }
+
+  /**
+   * Toggles exam day status for a date.
+   * Returns true if now an exam day, false if unmarked.
+   */
+  async toggleExamDay(dateStr: string): Promise<boolean> {
+    const exists = await this.isExamDay(dateStr);
+    if (exists) {
+      await this.db.runAsync(`DELETE FROM exam_days WHERE date_str = ?`, [dateStr]);
+      return false;
+    } else {
+      const now = new Date().toISOString();
+      await this.db.runAsync(`DELETE FROM break_days WHERE date_str = ?`, [dateStr]);
+      await this.db.runAsync(
+        `INSERT INTO exam_days (date_str, created_at) VALUES (?, ?)`,
         [dateStr, now]
       );
       return true;
