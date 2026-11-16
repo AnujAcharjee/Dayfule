@@ -102,7 +102,7 @@ export const TaskEditorModal: React.FC<TaskEditorModalProps> = ({
                 styles.input,
                 {
                   backgroundColor: colors.card,
-                  borderColor: error ? '#FF3B30' : colors.cardBorder,
+                  borderColor: error ? '#FF9500' : colors.cardBorder,
                   color: colors.text,
                 },
               ]}
@@ -125,7 +125,7 @@ export const TaskEditorModal: React.FC<TaskEditorModalProps> = ({
             <View style={styles.priorityRow}>
               {(['low', 'normal', 'high'] as TaskPriority[]).map((p) => {
                 const isSelected = priority === p;
-                const pColor = p === 'high' ? '#FF3B30' : p === 'low' ? '#00C7BE' : '#FF9500';
+                const pColor = p === 'high' ? '#AF52DE' : p === 'low' ? '#00C7BE' : '#FF9500';
 
                 return (
                   <TouchableOpacity
@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
     minHeight: 80,
   },
   errorText: {
-    color: '#FF3B30',
+    color: '#FF9500',
     fontSize: 12,
     marginTop: 4,
     marginLeft: 4,

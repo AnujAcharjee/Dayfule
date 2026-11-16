@@ -187,7 +187,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                 {/* Status tags */}
                 <View style={styles.tagRow}>
                   {day.isToday && (
-                    <View style={[styles.statusTag, { backgroundColor: '#FF2D55' }]}>
+                    <View style={[styles.statusTag, { backgroundColor: '#0A84FF' }]}>
                       <Text style={styles.todayTagText}>TODAY</Text>
                     </View>
                   )}

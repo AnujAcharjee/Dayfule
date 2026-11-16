@@ -160,7 +160,7 @@ export const DayLoader: React.FC<DayLoaderProps> = React.memo(({
                 {day.dayOfMonth}
               </Text>
             ) : day.isToday ? (
-              <View style={[styles.todayDot, { backgroundColor: '#FF2D55' }]} />
+              <View style={[styles.todayDot, { backgroundColor: '#0A84FF' }]} />
             ) : null}
           </View>
         </View>
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
   todayWrapper: {
     borderRadius: 999,
     borderWidth: 1.5,
-    borderColor: '#FF2D55',
+    borderColor: '#0A84FF',
     padding: 1,
   },
   todayDot: {

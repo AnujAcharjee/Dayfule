@@ -33,7 +33,7 @@ export default function RootLayout() {
         <React.Suspense
           fallback={
             <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: '#09090B' }}>
-              <ActivityIndicator size="large" color="#FF2D55" />
+              <ActivityIndicator size="large" color="#0A84FF" />
             </View>
           }
         >

@@ -245,7 +245,7 @@ const styles = StyleSheet.create({
   cardWrapper: {
     width: '100%',
     maxWidth: 360,
-    shadowColor: '#FF2D55',
+    shadowColor: '#0A84FF',
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.35,
     shadowRadius: 25,

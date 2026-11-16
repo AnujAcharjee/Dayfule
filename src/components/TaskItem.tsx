@@ -34,7 +34,7 @@ export const TaskItem: React.FC<TaskItemProps> = React.memo(({
   const getPriorityColor = () => {
     switch (task.priority) {
       case 'high':
-        return '#FF3B30';
+        return '#AF52DE';
       case 'low':
         return '#00C7BE';
       default:
