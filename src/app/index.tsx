@@ -3,7 +3,6 @@ import {
   View,
   StyleSheet,
   ActivityIndicator,
-  Alert,
   TouchableOpacity,
   Text,
 } from 'react-native';
@@ -21,7 +20,6 @@ import {
 import { YearHeader } from '@/components/YearHeader';
 import { YearGrid } from '@/components/YearGrid';
 import { DayDetailModal } from '@/components/DayDetailModal';
-import { ArchivesModal } from '@/components/ArchivesModal';
 
 export default function IndexScreen() {
   const insets = useSafeAreaInsets();
@@ -32,7 +30,6 @@ export default function IndexScreen() {
   const currentActualYear = new Date().getFullYear();
   const [selectedYear, setSelectedYear] = useState<number>(currentActualYear);
   const [viewMode, setViewMode] = useState<'months' | 'dense'>('months');
-  const [isArchived, setIsArchived] = useState<boolean>(false);
   const [aggregations, setAggregations] = useState<
     Record<string, { total: number; completed: number }>
   >({});
@@ -42,19 +39,12 @@ export default function IndexScreen() {
   const [selectedDay, setSelectedDay] = useState<DayProgress | null>(null);
   const [isDayModalVisible, setIsDayModalVisible] = useState<boolean>(false);
 
-  // Archives modal
-  const [isArchivesVisible, setIsArchivesVisible] = useState<boolean>(false);
-
   // Load data for the selected year
   const loadYearData = useCallback(async () => {
     setLoading(true);
     try {
-      const [aggs, archived] = await Promise.all([
-        repo.getYearAggregations(selectedYear),
-        repo.isYearArchived(selectedYear),
-      ]);
+      const aggs = await repo.getYearAggregations(selectedYear);
       setAggregations(aggs);
-      setIsArchived(archived);
     } catch (err) {
       console.error('Failed to load year data', err);
     } finally {
@@ -66,10 +56,10 @@ export default function IndexScreen() {
     loadYearData();
   }, [loadYearData]);
 
-  // Generate 365/366 day progress items
+  // Generate 365/366 day progress items - auto-freezes past days at end of day
   const days = useMemo(() => {
-    return generateYearDays(selectedYear, aggregations, isArchived);
-  }, [selectedYear, aggregations, isArchived]);
+    return generateYearDays(selectedYear, aggregations);
+  }, [selectedYear, aggregations]);
 
   // Compute Year stats
   const stats: YearStats = useMemo(() => {
@@ -110,42 +100,6 @@ export default function IndexScreen() {
     }
   };
 
-  // Archive / unarchive year
-  const handleArchiveToggle = async () => {
-    if (!isArchived) {
-      Alert.alert(
-        'Archive Year',
-        `Are you sure you want to archive ${selectedYear}? All days and tasks in this year will freeze and become read-only.`,
-        [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Archive',
-            style: 'destructive',
-            onPress: async () => {
-              await repo.archiveYear(selectedYear);
-              await loadYearData();
-            },
-          },
-        ]
-      );
-    } else {
-      Alert.alert(
-        'Unarchive Year',
-        `Do you want to reopen ${selectedYear}? Past days will remain frozen, but you can plan or adjust tasks.`,
-        [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Reopen',
-            onPress: async () => {
-              await repo.unarchiveYear(selectedYear);
-              await loadYearData();
-            },
-          },
-        ]
-      );
-    }
-  };
-
   // Jump to today
   const handleJumpToToday = () => {
     if (selectedYear !== currentActualYear) {
@@ -164,11 +118,8 @@ export default function IndexScreen() {
       <YearHeader
         year={selectedYear}
         stats={stats}
-        isArchived={isArchived}
         onPrevYear={() => setSelectedYear((y) => y - 1)}
         onNextYear={() => setSelectedYear((y) => y + 1)}
-        onArchiveToggle={handleArchiveToggle}
-        onOpenArchives={() => setIsArchivesVisible(true)}
         viewMode={viewMode}
         onToggleViewMode={() =>
           setViewMode((m) => (m === 'months' ? 'dense' : 'months'))
@@ -178,7 +129,7 @@ export default function IndexScreen() {
       {/* Grid or Loader */}
       {loading ? (
         <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#FF2D55" />
+          <ActivityIndicator size="large" color="#0A84FF" />
         </View>
       ) : (
         <YearGrid
@@ -210,14 +161,6 @@ export default function IndexScreen() {
         }}
         onDayUpdated={handleDayUpdated}
       />
-
-      {/* Archives Modal */}
-      <ArchivesModal
-        visible={isArchivesVisible}
-        currentSelectedYear={selectedYear}
-        onSelectYear={(yr) => setSelectedYear(yr)}
-        onClose={() => setIsArchivesVisible(false)}
-      />
     </View>
   );
 }
@@ -238,14 +181,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: '#FF2D55',
+    backgroundColor: '#0A84FF',
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 24,
-    shadowColor: '#FF2D55',
+    shadowColor: '#0A84FF',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
     elevation: 8,
   },
   floatingTodayText: {

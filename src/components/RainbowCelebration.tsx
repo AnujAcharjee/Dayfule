@@ -231,14 +231,7 @@ export const RainbowCelebration: React.FC<RainbowCelebrationProps> = ({
                 activeOpacity={0.85}
                 onPress={onClose}
               >
-                <LinearGradient
-                  colors={RAINBOW_STOPS}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={styles.actionButtonGradient}
-                >
-                  <Text style={styles.actionButtonText}>Awesome!</Text>
-                </LinearGradient>
+                <Text style={styles.actionButtonText}>Awesome!</Text>
               </TouchableOpacity>
             </View>
           </LinearGradient>
@@ -341,9 +334,7 @@ const styles = StyleSheet.create({
   actionButton: {
     width: '100%',
     borderRadius: 14,
-    overflow: 'hidden',
-  },
-  actionButtonGradient: {
+    backgroundColor: '#0A84FF',
     paddingVertical: 14,
     alignItems: 'center',
     justifyContent: 'center',

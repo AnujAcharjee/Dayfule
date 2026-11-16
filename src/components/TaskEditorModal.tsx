@@ -10,11 +10,9 @@ import {
   Platform,
   ScrollView,
 } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Task, TaskPriority } from '@/types';
 import { useTheme } from '@/context/ThemeContext';
-import { RAINBOW_STOPS } from '@/utils/colors';
 
 interface TaskEditorModalProps {
   visible: boolean;
@@ -192,16 +190,9 @@ export const TaskEditorModal: React.FC<TaskEditorModalProps> = ({
               style={styles.saveButton}
               onPress={handleSave}
             >
-              <LinearGradient
-                colors={RAINBOW_STOPS}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
-                style={styles.saveGradient}
-              >
-                <Text style={styles.saveText}>
-                  {isEditing ? 'Update Task' : 'Add Task'}
-                </Text>
-              </LinearGradient>
+              <Text style={styles.saveText}>
+                {isEditing ? 'Update Task' : 'Add Task'}
+              </Text>
             </TouchableOpacity>
           </ScrollView>
         </View>
@@ -300,9 +291,7 @@ const styles = StyleSheet.create({
   saveButton: {
     marginTop: 22,
     borderRadius: 14,
-    overflow: 'hidden',
-  },
-  saveGradient: {
+    backgroundColor: '#0A84FF',
     paddingVertical: 15,
     alignItems: 'center',
     justifyContent: 'center',

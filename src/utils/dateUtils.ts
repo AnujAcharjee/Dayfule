@@ -57,8 +57,7 @@ export const WEEKDAY_NAMES_SHORT = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
  */
 export function generateYearDays(
   year: number,
-  taskAggregations: Record<string, { total: number; completed: number }> = {},
-  isYearArchived: boolean = false
+  taskAggregations: Record<string, { total: number; completed: number }> = {}
 ): DayProgress[] {
   const days: DayProgress[] = [];
   const todayKey = getTodayKey();
@@ -77,7 +76,7 @@ export function generateYearDays(
     const isToday = dateStr === todayKey;
     const isPast = dateStr < todayKey;
     const isFuture = dateStr > todayKey;
-    const isFrozen = isYearArchived || isPast;
+    const isFrozen = isPast; // Day freezes automatically at the end of the day
 
     days.push({
       date_str: dateStr,

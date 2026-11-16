@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { DayProgress } from '@/types';
 import { useTheme } from '@/context/ThemeContext';
 import { DayLoader } from './DayLoader';
@@ -8,7 +8,6 @@ import {
   WEEKDAY_NAMES_SHORT,
   groupDaysByMonth,
 } from '@/utils/dateUtils';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 interface YearGridProps {
   days: DayProgress[];
@@ -16,52 +15,16 @@ interface YearGridProps {
   onDayPress: (day: DayProgress) => void;
 }
 
-const { width: SCREEN_WIDTH } = Dimensions.get('window');
-
 export const YearGrid: React.FC<YearGridProps> = ({
   days,
   viewMode,
   onDayPress,
 }) => {
-  const { colors, mode } = useTheme();
+  const { colors } = useTheme();
   const months = groupDaysByMonth(days);
 
   return (
     <View style={styles.container}>
-      {/* Legend bar */}
-      <View style={[styles.legendRow, { backgroundColor: colors.surface, borderColor: colors.surfaceBorder }]}>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendCircle, { borderColor: colors.textMuted }]} />
-          <Text style={[styles.legendLabel, { color: colors.textSecondary }]}>Empty</Text>
-        </View>
-
-        <View style={styles.legendItem}>
-          <View style={[styles.legendCircle, { borderColor: '#00C9FF', borderTopColor: '#2ECC71' }]} />
-          <Text style={[styles.legendLabel, { color: colors.textSecondary }]}>Active</Text>
-        </View>
-
-        <View style={styles.legendItem}>
-          <View style={[styles.legendCircle, { borderColor: '#FF2D55', backgroundColor: '#2ECC71' }]}>
-            <MaterialCommunityIcons name="check" size={8} color="#FFFFFF" />
-          </View>
-          <Text style={[styles.legendLabel, { color: colors.textSecondary }]}>100%</Text>
-        </View>
-
-        <View style={styles.legendItem}>
-          <View style={[styles.legendCircle, { borderColor: colors.frozenBorder, backgroundColor: colors.frozenBg }]}>
-            <MaterialCommunityIcons name="lock" size={7} color={colors.textMuted} />
-          </View>
-          <Text style={[styles.legendLabel, { color: colors.textSecondary }]}>Frozen</Text>
-        </View>
-
-        <View style={styles.legendItem}>
-          <View style={[styles.legendCircle, { borderColor: '#FF2D55', borderWidth: 1.5 }]}>
-            <View style={{ width: 3, height: 3, borderRadius: 1.5, backgroundColor: '#FF2D55' }} />
-          </View>
-          <Text style={[styles.legendLabel, { color: colors.textSecondary }]}>Today</Text>
-        </View>
-      </View>
-
       {/* Main Grid View */}
       {viewMode === 'months' ? (
         <ScrollView
@@ -224,34 +187,6 @@ function renderDenseWeeks(days: DayProgress[], onDayPress: (d: DayProgress) => v
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-  },
-  legendRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    paddingVertical: 8,
-    paddingHorizontal: 12,
-    marginHorizontal: 16,
-    marginBottom: 8,
-    borderRadius: 12,
-    borderWidth: 1,
-  },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-  },
-  legendCircle: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    borderWidth: 1.5,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  legendLabel: {
-    fontSize: 10,
-    fontWeight: '600',
   },
   scroll: {
     flex: 1,

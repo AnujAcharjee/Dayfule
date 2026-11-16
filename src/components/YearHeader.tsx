@@ -1,19 +1,14 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
 import { YearStats } from '@/types';
 import { useTheme } from '@/context/ThemeContext';
-import { RAINBOW_STOPS } from '@/utils/colors';
 
 interface YearHeaderProps {
   year: number;
   stats: YearStats;
-  isArchived: boolean;
   onPrevYear: () => void;
   onNextYear: () => void;
-  onArchiveToggle: () => void;
-  onOpenArchives: () => void;
   viewMode: 'months' | 'dense';
   onToggleViewMode: () => void;
 }
@@ -21,21 +16,16 @@ interface YearHeaderProps {
 export const YearHeader: React.FC<YearHeaderProps> = ({
   year,
   stats,
-  isArchived,
   onPrevYear,
   onNextYear,
-  onArchiveToggle,
-  onOpenArchives,
   viewMode,
   onToggleViewMode,
 }) => {
   const { colors, mode, toggleTheme } = useTheme();
-  const currentYear = new Date().getFullYear();
-  const isCurrentYear = year === currentYear;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* Top action row */}
+      {/* Top brand & controls row */}
       <View style={styles.topRow}>
         <View style={styles.brandContainer}>
           <Text style={[styles.brandTitle, { color: colors.text }]}>TASKFULE</Text>
@@ -71,19 +61,6 @@ export const YearHeader: React.FC<YearHeaderProps> = ({
               color={colors.text}
             />
           </TouchableOpacity>
-
-          {/* Archive drawer button */}
-          <TouchableOpacity
-            style={[styles.iconCircle, { backgroundColor: colors.surface, borderColor: colors.surfaceBorder }]}
-            onPress={onOpenArchives}
-            activeOpacity={0.8}
-          >
-            <MaterialCommunityIcons
-              name="history"
-              size={18}
-              color={colors.text}
-            />
-          </TouchableOpacity>
         </View>
       </View>
 
@@ -98,17 +75,6 @@ export const YearHeader: React.FC<YearHeaderProps> = ({
 
         <View style={styles.yearDisplay}>
           <Text style={[styles.yearNumber, { color: colors.text }]}>{year}</Text>
-          {isArchived ? (
-            <View style={[styles.archiveBadge, { backgroundColor: colors.frozenBg, borderColor: colors.frozenBorder }]}>
-              <MaterialCommunityIcons name="lock" size={11} color={colors.textMuted} />
-              <Text style={[styles.archiveBadgeText, { color: colors.textMuted }]}>ARCHIVED</Text>
-            </View>
-          ) : isCurrentYear ? (
-            <View style={styles.activeBadge}>
-              <View style={styles.activePulse} />
-              <Text style={styles.activeBadgeText}>ACTIVE YEAR</Text>
-            </View>
-          ) : null}
         </View>
 
         <TouchableOpacity
@@ -119,16 +85,16 @@ export const YearHeader: React.FC<YearHeaderProps> = ({
         </TouchableOpacity>
       </View>
 
-      {/* Year Overall Rainbow Progress Bar */}
+      {/* Year Overall Progress Bar */}
       <View style={styles.progressSection}>
         <View style={styles.progressBarBg}>
-          <LinearGradient
-            colors={RAINBOW_STOPS}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
+          <View
             style={[
               styles.progressBarFill,
-              { width: `${Math.max(stats.completionRate, stats.totalTasks > 0 ? 4 : 0)}%` },
+              {
+                width: `${Math.max(stats.completionRate, stats.totalTasks > 0 ? 3 : 0)}%`,
+                backgroundColor: '#0A84FF',
+              },
             ]}
           />
         </View>
@@ -155,35 +121,10 @@ export const YearHeader: React.FC<YearHeaderProps> = ({
 
         <View style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.surfaceBorder }]}>
           <Text style={[styles.statValue, { color: colors.text }]}>
-            {stats.completedTasks}
-          </Text>
-          <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Tasks Done</Text>
-        </View>
-
-        <View style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.surfaceBorder }]}>
-          <Text style={[styles.statValue, { color: colors.text }]}>
             {stats.perfectDays}
           </Text>
           <Text style={[styles.statLabel, { color: colors.textSecondary }]}>Perfect Days</Text>
         </View>
-      </View>
-
-      {/* Quick year archive button */}
-      <View style={styles.archiveActionRow}>
-        <TouchableOpacity
-          onPress={onArchiveToggle}
-          style={[styles.archiveButton, { borderColor: colors.surfaceBorder }]}
-          activeOpacity={0.7}
-        >
-          <MaterialCommunityIcons
-            name={isArchived ? 'lock-open-outline' : 'archive-outline'}
-            size={14}
-            color={colors.textSecondary}
-          />
-          <Text style={[styles.archiveButtonText, { color: colors.textSecondary }]}>
-            {isArchived ? 'Reopen / Unarchive Year' : 'Archive Year & Freeze'}
-          </Text>
-        </TouchableOpacity>
       </View>
     </View>
   );
@@ -215,7 +156,7 @@ const styles = StyleSheet.create({
     width: 6,
     height: 6,
     borderRadius: 3,
-    backgroundColor: '#FF2D55',
+    backgroundColor: '#0A84FF',
   },
   topActions: {
     flexDirection: 'row',
@@ -264,39 +205,6 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     letterSpacing: -1,
   },
-  archiveBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
-    borderWidth: 1,
-    marginTop: 2,
-  },
-  archiveBadgeText: {
-    fontSize: 9,
-    fontWeight: '800',
-    letterSpacing: 0.8,
-  },
-  activeBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    marginTop: 2,
-  },
-  activePulse: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#2ECC71',
-  },
-  activeBadgeText: {
-    color: '#2ECC71',
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 0.8,
-  },
   progressSection: {
     marginBottom: 12,
   },
@@ -316,7 +224,7 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    paddingVertical: 8,
+    paddingVertical: 10,
     paddingHorizontal: 6,
     borderRadius: 12,
     borderWidth: 1,
@@ -324,7 +232,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   statValue: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '800',
     letterSpacing: -0.3,
   },
@@ -337,22 +245,5 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '600',
     marginTop: 2,
-  },
-  archiveActionRow: {
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  archiveButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 14,
-    borderWidth: 1,
-  },
-  archiveButtonText: {
-    fontSize: 11,
-    fontWeight: '600',
   },
 });

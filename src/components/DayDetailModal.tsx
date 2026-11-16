@@ -169,14 +169,9 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                 {/* Day status tag */}
                 <View style={styles.tagRow}>
                   {day.isToday && (
-                    <LinearGradient
-                      colors={['#FF2D55', '#FF9500']}
-                      start={{ x: 0, y: 0 }}
-                      end={{ x: 1, y: 0 }}
-                      style={styles.statusTag}
-                    >
+                    <View style={[styles.statusTag, { backgroundColor: '#FF2D55' }]}>
                       <Text style={styles.todayTagText}>TODAY</Text>
-                    </LinearGradient>
+                    </View>
                   )}
 
                   {day.isFrozen && (
@@ -192,7 +187,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                         color={colors.textMuted}
                       />
                       <Text style={[styles.frozenTagText, { color: colors.textMuted }]}>
-                        FROZEN ARCHIVE
+                        FROZEN
                       </Text>
                     </View>
                   )}
@@ -237,8 +232,7 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                   color={colors.textMuted}
                 />
                 <Text style={[styles.frozenBannerText, { color: colors.textSecondary }]}>
-                  This day has passed and is frozen. Completed and uncompleted tasks are locked
-                  to preserve your true productivity record.
+                  This day has ended and is frozen. Completed and uncompleted tasks can no longer be updated.
                 </Text>
               </View>
             )}
@@ -329,15 +323,8 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                     setShowEditor(true);
                   }}
                 >
-                  <LinearGradient
-                    colors={RAINBOW_STOPS}
-                    start={{ x: 0, y: 0 }}
-                    end={{ x: 1, y: 0 }}
-                    style={styles.addBtnGradient}
-                  >
-                    <MaterialCommunityIcons name="plus" size={16} color="#FFFFFF" />
-                    <Text style={styles.addBtnText}>Add Task</Text>
-                  </LinearGradient>
+                  <MaterialCommunityIcons name="plus" size={16} color="#FFFFFF" />
+                  <Text style={styles.addBtnText}>Add Task</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -359,14 +346,14 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                 </Text>
                 {!day.isFrozen && (
                   <TouchableOpacity
-                    style={[styles.emptyAddBtn, { borderColor: colors.surfaceBorder }]}
+                    style={styles.emptyAddBtn}
                     onPress={() => {
                       setEditingTask(null);
                       setShowEditor(true);
                     }}
                   >
-                    <Text style={[styles.emptyAddBtnText, { color: colors.text }]}>
-                      + Plan a Task
+                    <Text style={styles.emptyAddBtnText}>
+                      + Add Task
                     </Text>
                   </TouchableOpacity>
                 )}
@@ -569,19 +556,17 @@ const styles = StyleSheet.create({
     letterSpacing: 0.8,
   },
   addButton: {
-    borderRadius: 10,
-    overflow: 'hidden',
-  },
-  addBtnGradient: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+    backgroundColor: '#0A84FF',
     paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingVertical: 7,
+    borderRadius: 10,
   },
   addBtnText: {
     color: '#FFFFFF',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '700',
   },
   loadingContainer: {
@@ -601,13 +586,14 @@ const styles = StyleSheet.create({
   emptyAddBtn: {
     marginTop: 8,
     paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingVertical: 9,
     borderRadius: 10,
-    borderWidth: 1,
+    backgroundColor: '#0A84FF',
   },
   emptyAddBtnText: {
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '700',
+    color: '#FFFFFF',
   },
   tasksList: {
     flex: 1,
