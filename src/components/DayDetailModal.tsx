@@ -310,26 +310,6 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                 </View>
               </View>
 
-              {/* Progress Summary Text */}
-              <View style={styles.progressSummary}>
-                <Text style={[styles.progressTitle, { color: colors.text }]}>
-                  {isBreakDay
-                    ? 'Break Day Active'
-                    : totalCount === 0
-                    ? 'No tasks yet'
-                    : isPerfect
-                    ? 'All completed!'
-                    : `${completedCount} of ${totalCount} done`}
-                </Text>
-                <Text style={[styles.progressSubtitle, { color: colors.textSecondary }]}>
-                  {isBreakDay
-                    ? 'Resting today · Streaks kept'
-                    : totalCount === 0
-                    ? 'Plan your day or take a break'
-                    : `${progressPct}% daily progress`}
-                </Text>
-              </View>
-
               {/* Action Buttons: Mark Break Day & Add Task */}
               {!day.isFrozen && (
                 <View style={styles.actionButtonsRow}>
@@ -338,20 +318,20 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                     style={[
                       styles.breakButton,
                       isBreakDay
-                        ? { backgroundColor: '#C2185B', borderColor: '#880E4F' }
-                        : { backgroundColor: colors.surfaceHover, borderColor: colors.surfaceBorder },
+                        ? { backgroundColor: '#C2185B', borderColor: '#C2185B' }
+                        : { backgroundColor: 'transparent', borderColor: '#C2185B' },
                     ]}
                     onPress={handleToggleBreakDay}
                   >
                     <MaterialCommunityIcons
                       name={isBreakDay ? 'coffee' : 'coffee-outline'}
                       size={15}
-                      color={isBreakDay ? '#FFFFFF' : colors.textSecondary}
+                      color={isBreakDay ? '#FFFFFF' : '#C2185B'}
                     />
                     <Text
                       style={[
                         styles.breakButtonText,
-                        { color: isBreakDay ? '#FFFFFF' : colors.textSecondary },
+                        { color: isBreakDay ? '#FFFFFF' : '#C2185B' },
                       ]}
                     >
                       {isBreakDay ? 'Break' : 'Break'}
@@ -419,8 +399,8 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                       style={[
                         styles.emptyBreakBtn,
                         isBreakDay
-                          ? { backgroundColor: '#C2185B' }
-                          : { backgroundColor: colors.surfaceHover, borderColor: colors.surfaceBorder, borderWidth: 1 },
+                          ? { backgroundColor: '#C2185B', borderColor: '#C2185B' }
+                          : { backgroundColor: 'transparent', borderColor: '#C2185B' },
                       ]}
                       activeOpacity={0.8}
                       onPress={handleToggleBreakDay}
@@ -428,9 +408,9 @@ export const DayDetailModal: React.FC<DayDetailModalProps> = ({
                       <MaterialCommunityIcons
                         name={isBreakDay ? 'check' : 'coffee'}
                         size={17}
-                        color={isBreakDay ? '#FFFFFF' : colors.text}
+                        color={isBreakDay ? '#FFFFFF' : '#C2185B'}
                       />
-                      <Text style={[styles.emptyBreakBtnText, { color: isBreakDay ? '#FFFFFF' : colors.text }]}>
+                      <Text style={[styles.emptyBreakBtnText, { color: isBreakDay ? '#FFFFFF' : '#C2185B' }]}>
                         {isBreakDay ? 'Break Day Active' : 'Take a Break'}
                       </Text>
                     </TouchableOpacity>
@@ -590,12 +570,12 @@ const styles = StyleSheet.create({
   compactActionBar: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 14,
     borderWidth: 1,
     marginBottom: 10,
-    gap: 10,
   },
   loaderWrapper: {
     position: 'relative',
@@ -614,17 +594,6 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     letterSpacing: -0.5,
   },
-  progressSummary: {
-    flex: 1,
-  },
-  progressTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  progressSubtitle: {
-    fontSize: 11,
-    marginTop: 1,
-  },
   actionButtonsRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -634,10 +603,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    paddingHorizontal: 10,
+    paddingHorizontal: 11,
     paddingVertical: 7,
     borderRadius: 10,
-    borderWidth: 1,
+    borderWidth: 1.5,
   },
   breakButtonText: {
     fontSize: 12,
@@ -703,6 +672,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 9,
     borderRadius: 11,
+    borderWidth: 1.5,
   },
   emptyBreakBtnText: {
     fontSize: 13,
