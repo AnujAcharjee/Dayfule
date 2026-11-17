@@ -152,7 +152,7 @@ export function TodayWidget({
                   ? 'Enjoy your break today!'
                   : isExam
                   ? 'Exam day active. Best of luck!'
-                  : 'No tasks yet today. Tap to plan.'
+                  : 'No tasks yet today'
               }
               style={{
                 fontSize: 12,
@@ -169,7 +169,7 @@ export function TodayWidget({
                 flexDirection: 'row',
                 alignItems: 'center',
                 width: 'match_parent',
-                paddingVertical: 2.5,
+                paddingVertical: 3,
               }}
             >
               <TextWidget
@@ -193,35 +193,17 @@ export function TodayWidget({
             </FlexWidget>
           ))
         )}
-      </FlexWidget>
-
-      {/* Footer hint */}
-      <FlexWidget
-        style={{
-          flexDirection: 'row',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginTop: 4,
-          paddingTop: 4,
-          borderTopColor: '#202026',
-          borderTopWidth: 1,
-        }}
-      >
-        <TextWidget
-          text={total > 4 ? `+${total - 4} more tasks` : 'Tap to open Dayfule'}
-          style={{
-            fontSize: 10,
-            color: '#71717A',
-          }}
-        />
-        <TextWidget
-          text="Dayfule"
-          style={{
-            fontSize: 10,
-            color: '#FF6D00',
-            fontWeight: 'bold',
-          }}
-        />
+        {total > 4 ? (
+          <TextWidget
+            text={`+${total - 4} more`}
+            style={{
+              fontSize: 10,
+              color: '#71717A',
+              marginTop: 2,
+              marginLeft: 14,
+            }}
+          />
+        ) : null}
       </FlexWidget>
     </FlexWidget>
   );

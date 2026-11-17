@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Modal,
   View,
@@ -9,10 +9,20 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  Keyboard,
+  LayoutAnimation,
+  UIManager,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Task, TaskPriority } from '@/types';
 import { useTheme } from '@/context/ThemeContext';
+
+if (
+  Platform.OS === 'android' &&
+  UIManager.setLayoutAnimationEnabledExperimental
+) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
 
 interface TaskEditorModalProps {
   visible: boolean;
@@ -34,6 +44,36 @@ export const TaskEditorModal: React.FC<TaskEditorModalProps> = ({
   const [notes, setNotes] = useState('');
   const [priority, setPriority] = useState<TaskPriority>('normal');
   const [error, setError] = useState('');
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  const scrollRef = useRef<React.ElementRef<typeof ScrollView>>(null);
+  const notesInputRef = useRef<React.ElementRef<typeof TextInput>>(null);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      (e) => {
+        if (Platform.OS === 'android') {
+          LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        }
+        setKeyboardHeight(e.endCoordinates.height);
+      }
+    );
+    const hideSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => {
+        if (Platform.OS === 'android') {
+          LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+        }
+        setKeyboardHeight(0);
+      }
+    );
+
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
 
   useEffect(() => {
     if (visible) {
@@ -47,6 +87,8 @@ export const TaskEditorModal: React.FC<TaskEditorModalProps> = ({
         setPriority('normal');
       }
       setError('');
+    } else {
+      setKeyboardHeight(0);
     }
   }, [visible, initialTask]);
 
@@ -70,7 +112,10 @@ export const TaskEditorModal: React.FC<TaskEditorModalProps> = ({
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        style={styles.overlay}
+        style={[
+          styles.overlay,
+          Platform.OS === 'android' && { paddingBottom: keyboardHeight },
+        ]}
       >
         <TouchableOpacity
           style={StyleSheet.absoluteFill}
@@ -94,7 +139,14 @@ export const TaskEditorModal: React.FC<TaskEditorModalProps> = ({
             </TouchableOpacity>
           </View>
 
-          <ScrollView style={styles.formScroll} showsVerticalScrollIndicator={false}>
+          <ScrollView
+            ref={scrollRef}
+            style={styles.formScroll}
+            contentContainerStyle={styles.formScrollContent}
+            showsVerticalScrollIndicator={false}
+            keyboardShouldPersistTaps="handled"
+            keyboardDismissMode="interactive"
+          >
             {/* Title Input */}
             <Text style={[styles.label, { color: colors.textSecondary }]}>Title</Text>
             <TextInput
@@ -115,6 +167,10 @@ export const TaskEditorModal: React.FC<TaskEditorModalProps> = ({
               }}
               autoFocus
               returnKeyType="next"
+              onSubmitEditing={() => notesInputRef.current?.focus()}
+              onFocus={() => {
+                scrollRef.current?.scrollTo({ y: 0, animated: true });
+              }}
             />
             {error ? <Text style={styles.errorText}>{error}</Text> : null}
 
@@ -167,6 +223,7 @@ export const TaskEditorModal: React.FC<TaskEditorModalProps> = ({
               Notes (Optional)
             </Text>
             <TextInput
+              ref={notesInputRef}
               style={[
                 styles.textArea,
                 {
@@ -182,6 +239,11 @@ export const TaskEditorModal: React.FC<TaskEditorModalProps> = ({
               multiline
               numberOfLines={3}
               textAlignVertical="top"
+              onFocus={() => {
+                setTimeout(() => {
+                  scrollRef.current?.scrollToEnd({ animated: true });
+                }, 100);
+              }}
             />
 
             {/* Save Button */}
@@ -212,8 +274,8 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 24,
     paddingTop: 18,
     paddingHorizontal: 20,
-    paddingBottom: Platform.OS === 'ios' ? 36 : 24,
-    maxHeight: '85%',
+    paddingBottom: Platform.OS === 'ios' ? 36 : 16,
+    maxHeight: '88%',
   },
   header: {
     flexDirection: 'row',
@@ -235,7 +297,10 @@ const styles = StyleSheet.create({
     borderRadius: 20,
   },
   formScroll: {
-    marginBottom: 8,
+    marginBottom: 0,
+  },
+  formScrollContent: {
+    paddingBottom: 24,
   },
   label: {
     fontSize: 12,
