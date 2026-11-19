@@ -12,6 +12,7 @@ import {
   Keyboard,
   LayoutAnimation,
   UIManager,
+  useWindowDimensions,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Task, TaskPriority } from '@/types';
@@ -40,11 +41,18 @@ export const TaskEditorModal: React.FC<TaskEditorModalProps> = ({
   onClose,
 }) => {
   const { colors, mode } = useTheme();
+  const { height: windowHeight } = useWindowDimensions();
   const [title, setTitle] = useState('');
   const [notes, setNotes] = useState('');
   const [priority, setPriority] = useState<TaskPriority>('normal');
   const [error, setError] = useState('');
   const [keyboardHeight, setKeyboardHeight] = useState(0);
+
+  // Dynamic maximum sheet height that adapts to software keyboard on both Android & iOS
+  const maxSheetHeight =
+    keyboardHeight > 0
+      ? Math.max(260, windowHeight - keyboardHeight - (Platform.OS === 'android' ? 24 : 44))
+      : windowHeight * 0.88;
 
   const scrollRef = useRef<React.ElementRef<typeof ScrollView>>(null);
   const notesInputRef = useRef<React.ElementRef<typeof TextInput>>(null);
@@ -123,7 +131,12 @@ export const TaskEditorModal: React.FC<TaskEditorModalProps> = ({
           onPress={onClose}
         />
 
-        <View style={[styles.sheetContainer, { backgroundColor: colors.surface }]}>
+        <View
+          style={[
+            styles.sheetContainer,
+            { backgroundColor: colors.surface, maxHeight: maxSheetHeight },
+          ]}
+        >
           {/* Header */}
           <View style={styles.header}>
             <View>
@@ -275,7 +288,7 @@ const styles = StyleSheet.create({
     paddingTop: 18,
     paddingHorizontal: 20,
     paddingBottom: Platform.OS === 'ios' ? 36 : 16,
-    maxHeight: '88%',
+    flexShrink: 1,
   },
   header: {
     flexDirection: 'row',

@@ -11,7 +11,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '@/context/ThemeContext';
 import { TasksRepository } from '@/database/tasksRepository';
-import { DayProgress, YearStats } from '@/types';
+import { DayProgress, YearStats, TaskPriority } from '@/types';
 import {
   generateYearDays,
   calculateYearStats,
@@ -20,6 +20,7 @@ import {
 import { YearHeader } from '@/components/YearHeader';
 import { YearGrid } from '@/components/YearGrid';
 import { DayDetailModal } from '@/components/DayDetailModal';
+import { StretchTaskModal } from '@/components/StretchTaskModal';
 import { syncTodayWidget } from '@/widgets/widgetManager';
 
 export default function IndexScreen() {
@@ -41,6 +42,7 @@ export default function IndexScreen() {
   // Selected day for modal
   const [selectedDay, setSelectedDay] = useState<DayProgress | null>(null);
   const [isDayModalVisible, setIsDayModalVisible] = useState<boolean>(false);
+  const [isStretchModalVisible, setIsStretchModalVisible] = useState<boolean>(false);
 
   // Sync Today's tasks to the home screen widget
   const refreshTodayWidget = useCallback(async () => {
@@ -149,6 +151,21 @@ export default function IndexScreen() {
     }
   };
 
+  // Save stretch / batch task across a range of days
+  const handleSaveStretchTask = async (data: {
+    date_strings: string[];
+    title: string;
+    notes?: string;
+    priority: TaskPriority;
+  }) => {
+    try {
+      await repo.createTasksForDateRange(data);
+      await loadYearData();
+    } catch (err) {
+      console.error('Failed to create stretch task:', err);
+    }
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background, paddingTop: insets.top }]}>
       {/* Year Header & Stats */}
@@ -176,17 +193,28 @@ export default function IndexScreen() {
         />
       )}
 
-      {/* Quick floating "Today" button */}
-      {selectedYear === currentActualYear && (
+      {/* Floating Action Buttons: Stretch & Today */}
+      <View style={styles.floatingActionsRow}>
         <TouchableOpacity
-          style={[styles.floatingTodayBtn, { backgroundColor: '#0A84FF' }]}
+          style={[styles.floatingStretchBtn, { backgroundColor: '#FF6D00' }]}
           activeOpacity={0.85}
-          onPress={handleJumpToToday}
+          onPress={() => setIsStretchModalVisible(true)}
         >
-          <MaterialCommunityIcons name="target" size={18} color="#FFFFFF" />
-          <Text style={styles.floatingTodayText}>Today</Text>
+          <MaterialCommunityIcons name="calendar-range" size={17} color="#FFFFFF" />
+          <Text style={styles.floatingBtnText}>Stretch</Text>
         </TouchableOpacity>
-      )}
+
+        {selectedYear === currentActualYear && (
+          <TouchableOpacity
+            style={[styles.floatingTodayBtn, { backgroundColor: '#0A84FF' }]}
+            activeOpacity={0.85}
+            onPress={handleJumpToToday}
+          >
+            <MaterialCommunityIcons name="target" size={17} color="#FFFFFF" />
+            <Text style={styles.floatingBtnText}>Today</Text>
+          </TouchableOpacity>
+        )}
+      </View>
 
       {/* Day Dropdown / Sheet Modal */}
       <DayDetailModal
@@ -197,6 +225,13 @@ export default function IndexScreen() {
           setSelectedDay(null);
         }}
         onDayUpdated={handleDayUpdated}
+      />
+
+      {/* Stretch / Multi-Day Task Modal */}
+      <StretchTaskModal
+        visible={isStretchModalVisible}
+        onSave={handleSaveStretchTask}
+        onClose={() => setIsStretchModalVisible(false)}
       />
     </View>
   );
@@ -211,15 +246,32 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  floatingTodayBtn: {
+  floatingActionsRow: {
     position: 'absolute',
     bottom: 24,
-    right: 20,
+    right: 18,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    backgroundColor: '#0A84FF',
-    paddingHorizontal: 16,
+    gap: 10,
+  },
+  floatingStretchBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderRadius: 24,
+    shadowColor: '#FF6D00',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  floatingTodayBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    paddingHorizontal: 15,
     paddingVertical: 10,
     borderRadius: 24,
     shadowColor: '#0A84FF',
@@ -228,10 +280,10 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     elevation: 8,
   },
-  floatingTodayText: {
+  floatingBtnText: {
     color: '#FFFFFF',
     fontWeight: '800',
     fontSize: 13,
-    letterSpacing: 0.5,
+    letterSpacing: 0.4,
   },
 });

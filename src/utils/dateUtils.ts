@@ -206,3 +206,50 @@ export function calculateYearStats(year: number, days: DayProgress[]): YearStats
     longestStreak,
   };
 }
+
+/**
+ * Returns an array of YYYY-MM-DD date strings for all dates between
+ * startDateStr and endDateStr (inclusive).
+ */
+export function getDateRangeArray(startDateStr: string, endDateStr: string): string[] {
+  let start = parseDateKey(startDateStr);
+  let end = parseDateKey(endDateStr);
+
+  if (start > end) {
+    const temp = start;
+    start = end;
+    end = temp;
+  }
+
+  const result: string[] = [];
+  const cursor = new Date(start);
+
+  while (cursor <= end) {
+    result.push(formatDateKey(cursor));
+    cursor.setDate(cursor.getDate() + 1);
+  }
+
+  return result;
+}
+
+/**
+ * Formats YYYY-MM-DD into short month + day (e.g., "Nov 19" or "Nov 19, 2026")
+ */
+export function formatDateShort(dateStr: string, includeYear: boolean = false): string {
+  const date = parseDateKey(dateStr);
+  const month = MONTH_NAMES_SHORT[date.getMonth()];
+  const day = date.getDate();
+  if (includeYear) {
+    return `${month} ${day}, ${date.getFullYear()}`;
+  }
+  return `${month} ${day}`;
+}
+
+/**
+ * Adds (or subtracts) a number of days to a YYYY-MM-DD date string
+ */
+export function addDaysToDateKey(dateStr: string, daysToAdd: number): string {
+  const date = parseDateKey(dateStr);
+  date.setDate(date.getDate() + daysToAdd);
+  return formatDateKey(date);
+}

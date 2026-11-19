@@ -271,4 +271,35 @@ export class TasksRepository {
       return true;
     }
   }
+
+  /**
+   * Batch creates the same task for an array of date strings.
+   * Runs inside an SQLite transaction for maximum performance and atomicity.
+   */
+  async createTasksForDateRange(params: {
+    date_strings: string[];
+    title: string;
+    priority?: TaskPriority;
+    notes?: string | null;
+  }): Promise<number> {
+    const priority = params.priority || 'normal';
+    const notes = params.notes && params.notes.trim() ? params.notes.trim() : null;
+    const title = params.title.trim();
+    let count = 0;
+
+    await this.db.withTransactionAsync(async () => {
+      for (const dateStr of params.date_strings) {
+        const id = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+        const now = new Date().toISOString();
+        await this.db.runAsync(
+          `INSERT INTO tasks (id, date_str, title, completed, completed_at, priority, notes, created_at, updated_at)
+           VALUES (?, ?, ?, 0, NULL, ?, ?, ?, ?)`,
+          [id, dateStr, title, priority, notes, now, now]
+        );
+        count++;
+      }
+    });
+
+    return count;
+  }
 }
