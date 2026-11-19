@@ -134,13 +134,16 @@ export function formatFullDate(dateStr: string): string {
  */
 export function calculateYearStats(year: number, days: DayProgress[]): YearStats {
   const todayKey = getTodayKey();
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayKey = formatDateKey(yesterday);
+
   let totalTasks = 0;
   let completedTasks = 0;
   let activeDays = 0;
   let perfectDays = 0;
   let daysPassed = 0;
 
-  let currentStreak = 0;
   let longestStreak = 0;
   let tempStreak = 0;
 
@@ -156,40 +159,59 @@ export function calculateYearStats(year: number, days: DayProgress[]): YearStats
       activeDays++;
     }
 
-    if (isPerfect) {
-      perfectDays++;
-      tempStreak++;
-      if (tempStreak > longestStreak) {
-        longestStreak = tempStreak;
-      }
-    } else {
-      if (day.isPast && hadTasks && !isPerfect) {
-        tempStreak = 0;
-      }
-    }
-
     if (day.isPast || day.isToday) {
       daysPassed++;
     }
+
+    if (!day.isFuture) {
+      if (isPerfect) {
+        perfectDays++;
+        tempStreak++;
+        if (tempStreak > longestStreak) {
+          longestStreak = tempStreak;
+        }
+      } else if (day.isPast) {
+        tempStreak = 0;
+      }
+    }
   }
 
-  // Calculate current streak backwards from today or yesterday
-  let streakCheck = 0;
-  // find index of today or last past day
-  const relevantDays = days.filter((d) => d.date_str <= todayKey);
-  for (let i = relevantDays.length - 1; i >= 0; i--) {
-    const d = relevantDays[i];
-    // if today has 0 tasks yet, skip today and look at yesterday
-    if (d.isToday && d.totalTasks === 0) {
-      continue;
-    }
-    if ((d.totalTasks > 0 && d.completedTasks === d.totalTasks) || d.isBreakDay || d.isExamDay) {
-      streakCheck++;
-    } else {
-      break;
+  // Calculate current streak:
+  // 1. Check if today is completed
+  const today = days.find((d) => d.isToday);
+  const isTodayCompleted = today
+    ? (today.totalTasks > 0 && today.completedTasks === today.totalTasks) ||
+      today.isBreakDay ||
+      today.isExamDay
+    : false;
+
+  // 2. Count consecutive completed days backwards starting from yesterday
+  const pastDays = days.filter((d) => d.date_str < todayKey);
+  let pastStreak = 0;
+
+  // Only count past streak if pastDays connects to yesterday
+  if (pastDays.length > 0 && pastDays[pastDays.length - 1].date_str === yesterdayKey) {
+    for (let i = pastDays.length - 1; i >= 0; i--) {
+      const d = pastDays[i];
+      const isCompleted =
+        (d.totalTasks > 0 && d.completedTasks === d.totalTasks) ||
+        d.isBreakDay ||
+        d.isExamDay;
+
+      if (isCompleted) {
+        pastStreak++;
+      } else {
+        break;
+      }
     }
   }
-  currentStreak = streakCheck;
+
+  // 3. Current streak:
+  // - If today is finished, it adds +1 to the past streak.
+  // - If today is still in progress, the active streak through yesterday is maintained.
+  const currentStreak = isTodayCompleted ? pastStreak + 1 : pastStreak;
+
+  longestStreak = Math.max(longestStreak, currentStreak);
 
   const completionRate = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
